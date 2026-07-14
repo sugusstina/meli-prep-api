@@ -6,46 +6,52 @@ import {
   deleteProductById
 } from "../services/products.service.js";
 
+import { AppError } from "../errors/AppError.js";
+import { sendSuccess } from "../utils/http-response.js";
+
 export function getProducts(req, res) {
   const products = getAllProducts();
 
-  res.status(200).json({
-    data: products,
-    error: null
+  return sendSuccess(res, {
+    data: products
   });
 }
 
-export function getProductById(req, res) {
+export function getProductById(req, res, next) {
   const { id } = req.params;
 
   const product = findProductById(id);
 
   if (!product) {
-    return res.status(400).json({
-      data: null,
-      error: {
-        message: "Product not found",
-        code: "PRODUCT_NOT_FOUND"
-      }
-    });
+    return next(
+      new AppError(
+        "Product not found",
+        404,
+        "PRODUCT_NOT_FOUND"
+      )
+    );
   }
-  res.status(200).json({
-    data: product,
-    error: null
+
+  return sendSuccess(res, {
+    data: product
   });
 }
 
-export function addProduct(req, res) {
+export function addProduct(req, res, next) {
   const { name, price, stock } = req.body;
 
-  if (!name || price === undefined || stock === undefined) {
-    return res.status(400).json({
-      data: null,
-      error: {
-        message: "Name, price and stock are required",
-        code: "INVALID_PRODUCT_PAYLOAD"
-      }
-    });
+  if (
+    !name ||
+    price === undefined ||
+    stock === undefined
+  ) {
+    return next(
+      new AppError(
+        "Name, price and stock are required",
+        400,
+        "INVALID_PRODUCT_PAYLOAD"
+      )
+    );
   }
 
   const newProduct = createProduct({
@@ -54,24 +60,28 @@ export function addProduct(req, res) {
     stock
   });
 
-  res.status(201).json({
-    data: newProduct,
-    error: null
+  return sendSuccess(res, {
+    statusCode: 201,
+    data: newProduct
   });
 }
 
-export function updateProduct(req, res) {
+export function updateProduct(req, res, next) {
   const { id } = req.params;
   const { name, price, stock } = req.body;
 
-  if (!name || price === undefined || stock === undefined) {
-    return res.status(400).json({
-      data: null,
-      error: {
-        message: "Name, price and stock are required",
-        code: "INVALID_PRODUCT_PAYLOAD"
-      }
-    });
+  if (
+    !name ||
+    price === undefined ||
+    stock === undefined
+  ) {
+    return next(
+      new AppError(
+        "Name, price and stock are required",
+        400,
+        "INVALID_PRODUCT_PAYLOAD"
+      )
+    );
   }
 
   const updatedProduct = updateProductById(id, {
@@ -81,38 +91,36 @@ export function updateProduct(req, res) {
   });
 
   if (!updatedProduct) {
-    return res.status(404).json({
-      data: null,
-      error: {
-        message: "Product not found",
-        code: "PRODUCT_NOT_FOUND"
-      }
-    });
+    return next(
+      new AppError(
+        "Product not found",
+        404,
+        "PRODUCT_NOT_FOUND"
+      )
+    );
   }
 
-  res.status(200).json({
-    data: updatedProduct,
-    error: null
+  return sendSuccess(res, {
+    data: updatedProduct
   });
 }
 
-export function removeProduct(req, res) {
+export function removeProduct(req, res, next) {
   const { id } = req.params;
 
   const deletedProduct = deleteProductById(id);
 
   if (!deletedProduct) {
-    return res.status(404).json({
-      data: null,
-      error: {
-        message: "Product not found",
-        code: "PRODUCT_NOT_FOUND"
-      }
-    });
+    return next(
+      new AppError(
+        "Product not found",
+        404,
+        "PRODUCT_NOT_FOUND"
+      )
+    );
   }
 
-  res.status(200).json({
-    data: deletedProduct,
-    error: null
+  return sendSuccess(res, {
+    data: deletedProduct
   });
 }
