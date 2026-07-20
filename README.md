@@ -153,10 +153,12 @@ See [`docs/api-contract.md`](docs/api-contract.md).
 - In-memory data
 - Centralized error handling
 - Consistent JSON response format
+- Product request validation with Zod
 
 ## Next improvements
 
-- Input validation with Zod
+- Order request validation with Zod
+- User request validation for future endpoints
 - Authentication and authorization
 - Security middleware
 - Unit tests

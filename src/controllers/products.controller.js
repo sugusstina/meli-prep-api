@@ -37,22 +37,8 @@ export function getProductById(req, res, next) {
   });
 }
 
-export function addProduct(req, res, next) {
-  const { name, price, stock } = req.body;
-
-  if (
-    !name ||
-    price === undefined ||
-    stock === undefined
-  ) {
-    return next(
-      new AppError(
-        "Name, price and stock are required",
-        400,
-        "INVALID_PRODUCT_PAYLOAD"
-      )
-    );
-  }
+export function addProduct(req, res) {
+  const { name, price, stock } = req.validatedBody;
 
   const newProduct = createProduct({
     name,
@@ -68,21 +54,7 @@ export function addProduct(req, res, next) {
 
 export function updateProduct(req, res, next) {
   const { id } = req.params;
-  const { name, price, stock } = req.body;
-
-  if (
-    !name ||
-    price === undefined ||
-    stock === undefined
-  ) {
-    return next(
-      new AppError(
-        "Name, price and stock are required",
-        400,
-        "INVALID_PRODUCT_PAYLOAD"
-      )
-    );
-  }
+  const { name, price, stock } = req.validatedBody;
 
   const updatedProduct = updateProductById(id, {
     name,

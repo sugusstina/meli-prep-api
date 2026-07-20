@@ -164,8 +164,14 @@ Creates a new product.
 {
   "data": null,
   "error": {
-    "message": "Name, price and stock are required",
-    "code": "INVALID_PRODUCT_PAYLOAD"
+    "message": "Invalid request body",
+    "code": "VALIDATION_ERROR",
+    "details": [
+      {
+        "path": "name",
+        "message": "Name must have at least 2 characters"
+      }
+    ]
   }
 }
 ```
