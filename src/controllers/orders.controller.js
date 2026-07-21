@@ -15,21 +15,7 @@ export function getOrders(req, res) {
 }
 
 export function addOrder(req, res, next) {
-  const { userId, productIds } = req.body;
-
-  if (
-    !userId ||
-    !Array.isArray(productIds) ||
-    productIds.length === 0
-  ) {
-    return next(
-      new AppError(
-        "userId and a non-empty productIds array are required",
-        400,
-        "INVALID_ORDER_PAYLOAD"
-      )
-    );
-  }
+  const { userId, productIds } = req.validatedBody;
 
   const result = createOrder({
     userId,

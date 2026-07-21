@@ -362,8 +362,14 @@ Creates a new order.
 {
   "data": null,
   "error": {
-    "message": "userId and a non-empty productIds array are required",
-    "code": "INVALID_ORDER_PAYLOAD"
+    "message": "Invalid request body",
+    "code": "VALIDATION_ERROR",
+    "details": [
+      {
+        "path": "productIds",
+        "message": "At least one product is required"
+      }
+    ]
   }
 }
 ```
