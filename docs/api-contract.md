@@ -446,3 +446,13 @@ Creates a new order.
   }
 }
 ```
+
+### Configuration
+
+**The API requires the following environment variables:**
+
+```txt
+NODE_ENV
+PORT
+PAYMENT_PROVIDER_API_KEY
+```

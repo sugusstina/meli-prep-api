@@ -156,6 +156,10 @@ See [`docs/api-contract.md`](docs/api-contract.md).
 - Product request validation with Zod
 - Order request validation with Zod
 
+```md id="ivvj2t"
+- Environment variable validation with Zod
+- `.env.example` documentation
+
 ## Next improvements
 
 - User request validation for future endpoints
@@ -167,5 +171,19 @@ See [`docs/api-contract.md`](docs/api-contract.md).
 
 ---
 
+## Environment variables
+
+Create a `.env` file based on `.env.example`.
+
+Required variables:
+
+```txt
+NODE_ENV=development
+PORT=3000
+PAYMENT_PROVIDER_API_KEY=
+
+The .env file should not be committed to the repository.
+
+Environment variables are validated on application startup. If a required variable is missing or invalid, the server will not start.
 
 ```
