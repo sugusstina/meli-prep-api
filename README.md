@@ -160,6 +160,8 @@ See [`docs/api-contract.md`](docs/api-contract.md).
 - `.env.example` documentation
 - Public serializers for API responses
 - Sensitive user fields excluded from responses
+- Manual security review documentation
+- Dependency audit script
 
 ## Next improvements
 
@@ -188,3 +190,24 @@ The .env file should not be committed to the repository.
 Environment variables are validated on application startup. If a required variable is missing or invalid, the server will not start.
 
 ```
+## Security notes
+
+This project currently includes basic security-focused practices:
+
+- Request body validation with Zod
+- Centralized error handling
+- Generic responses for unexpected server errors
+- Environment variable validation on startup
+- `.env.example` for required configuration
+- `.env` ignored by Git
+- Public serializers to avoid exposing internal fields
+- Manual security review documented in `docs/security-review.md`
+
+Current limitations:
+
+- No authentication yet
+- No authorization yet
+- No database yet
+- No automated tests yet
+- No rate limiting yet
+- No security headers yet

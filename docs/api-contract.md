@@ -474,3 +474,19 @@ NODE_ENV
 PORT
 PAYMENT_PROVIDER_API_KEY
 ```
+# Data exposure policy
+
+API responses should only expose public fields required by clients.
+
+User responses expose:
+
+```txt
+id
+name
+email
+
+User responses must not expose:
+
+passwordHash
+internalNotes
+security-related fields
