@@ -6,11 +6,16 @@ import {
 import { AppError } from "../errors/AppError.js";
 import { sendSuccess } from "../utils/http-response.js";
 
+import {
+  toPublicOrder,
+  toPublicOrders
+} from "../serializers/order.serializer.js";
+
 export function getOrders(req, res) {
   const orders = getAllOrders();
 
   return sendSuccess(res, {
-    data: orders
+    data: toPublicOrders(orders)
   });
 }
 
@@ -48,6 +53,6 @@ export function addOrder(req, res, next) {
 
   return sendSuccess(res, {
     statusCode: 201,
-    data: result.order
+    data: toPublicOrder(result.order)
   });
 }

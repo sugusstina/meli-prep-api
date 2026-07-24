@@ -96,8 +96,9 @@ DELETE /api/products/:id
 
 ### Users
 
-```
+```txt
 GET /api/users
+GET /api/users/:id
 ```
 
 ### Orders
@@ -155,10 +156,10 @@ See [`docs/api-contract.md`](docs/api-contract.md).
 - Consistent JSON response format
 - Product request validation with Zod
 - Order request validation with Zod
-
-```md id="ivvj2t"
 - Environment variable validation with Zod
 - `.env.example` documentation
+- Public serializers for API responses
+- Sensitive user fields excluded from responses
 
 ## Next improvements
 

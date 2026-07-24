@@ -322,6 +322,24 @@ Returns all orders.
 }
 ```
 
+## GET /api/users/:id
+
+Returns a public user by ID.
+
+### Success response
+
+Status: `200 OK`
+
+```json
+{
+  "data": {
+    "id": "user_1",
+    "name": "Laura Gómez",
+    "email": "laura@example.com"
+  },
+  "error": null
+}
+
 ---
 
 ### `POST /api/orders`

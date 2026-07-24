@@ -9,11 +9,16 @@ import {
 import { AppError } from "../errors/AppError.js";
 import { sendSuccess } from "../utils/http-response.js";
 
+import {
+  toPublicProduct,
+  toPublicProducts
+} from "../serializers/product.serializer.js";
+
 export function getProducts(req, res) {
   const products = getAllProducts();
 
   return sendSuccess(res, {
-    data: products
+    data: toPublicProducts(products)
   });
 }
 
@@ -33,7 +38,7 @@ export function getProductById(req, res, next) {
   }
 
   return sendSuccess(res, {
-    data: product
+    data: toPublicProduct(product)
   });
 }
 
@@ -48,7 +53,7 @@ export function addProduct(req, res) {
 
   return sendSuccess(res, {
     statusCode: 201,
-    data: newProduct
+    data: toPublicProduct(newProduct)
   });
 }
 
@@ -73,7 +78,7 @@ export function updateProduct(req, res, next) {
   }
 
   return sendSuccess(res, {
-    data: updatedProduct
+    data: toPublicProduct(updatedProduct)
   });
 }
 
@@ -93,6 +98,6 @@ export function removeProduct(req, res, next) {
   }
 
   return sendSuccess(res, {
-    data: deletedProduct
+    data: toPublicProduct(deletedProduct)
   });
 }
