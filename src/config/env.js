@@ -14,7 +14,14 @@ const envSchema = z.object({
 
   PAYMENT_PROVIDER_API_KEY: z
     .string()
-    .min(1, "PAYMENT_PROVIDER_API_KEY is required")
+    .min(1, "PAYMENT_PROVIDER_API_KEY is required"),
+
+  BCRYPT_SALT_ROUNDS: z
+    .coerce
+    .number()
+    .int("BCRYPT_SALT_ROUNDS must be an integer")
+    .min(10, "BCRYPT_SALT_ROUNDS must be at least 10")
+    .default(10)
 });
 
 const result = envSchema.safeParse(process.env);

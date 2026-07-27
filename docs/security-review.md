@@ -160,3 +160,12 @@ Possible next steps:
 - Add stricter CORS configuration.
 - Add automated tests for validation and error cases.
 - Add dependency audit checks.
+
+
+## 8. Authentication
+
+The API currently supports:
+
+```txt
+POST /api/auth/register
+POST /api/auth/login

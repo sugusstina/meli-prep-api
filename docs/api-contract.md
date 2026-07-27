@@ -297,6 +297,27 @@ Returns all users.
 
 ---
 
+### `GET /api/users/:id`
+
+Returns a public user by ID.
+
+#### Success response
+
+**Status:** `200 OK`
+
+```json
+{
+  "data": {
+    "id": "user_1",
+    "name": "Laura Gómez",
+    "email": "laura@example.com"
+  },
+  "error": null
+}
+```
+
+---
+
 ## Orders
 
 ### `GET /api/orders`
@@ -321,24 +342,6 @@ Returns all orders.
   "error": null
 }
 ```
-
-## GET /api/users/:id
-
-Returns a public user by ID.
-
-### Success response
-
-Status: `200 OK`
-
-```json
-{
-  "data": {
-    "id": "user_1",
-    "name": "Laura Gómez",
-    "email": "laura@example.com"
-  },
-  "error": null
-}
 
 ---
 
@@ -421,6 +424,131 @@ Creates a new order.
 
 ---
 
+## Auth
+
+### `POST /api/auth/register`
+
+Creates a new user account.
+
+#### Request body
+
+```json
+{
+  "name": "Agustina",
+  "email": "agus@example.com",
+  "password": "supersecret"
+}
+```
+
+#### Success response
+
+**Status:** `201 Created`
+
+```json
+{
+  "data": {
+    "user": {
+      "id": "user_123456789",
+      "name": "Agustina",
+      "email": "agus@example.com"
+    }
+  },
+  "error": null
+}
+```
+
+#### Error responses
+
+**Status:** `400 Bad Request`
+
+```json
+{
+  "data": null,
+  "error": {
+    "message": "Invalid request body",
+    "code": "VALIDATION_ERROR",
+    "details": [
+      {
+        "path": "password",
+        "message": "Password must have at least 8 characters"
+      }
+    ]
+  }
+}
+```
+
+**Status:** `409 Conflict`
+
+```json
+{
+  "data": null,
+  "error": {
+    "message": "Email is already in use",
+    "code": "EMAIL_ALREADY_IN_USE"
+  }
+}
+```
+
+---
+
+### `POST /api/auth/login`
+
+Authenticates an existing user.
+
+#### Request body
+
+```json
+{
+  "email": "agus@example.com",
+  "password": "supersecret"
+}
+```
+
+#### Success response
+
+**Status:** `200 OK`
+
+```json
+{
+  "data": {
+    "user": {
+      "id": "user_123456789",
+      "name": "Agustina",
+      "email": "agus@example.com"
+    }
+  },
+  "error": null
+}
+```
+
+#### Error responses
+
+**Status:** `400 Bad Request`
+
+```json
+{
+  "data": null,
+  "error": {
+    "message": "Invalid request body",
+    "code": "VALIDATION_ERROR"
+  }
+}
+```
+
+**Status:** `401 Unauthorized`
+
+```json
+{
+  "data": null,
+  "error": {
+    "message": "Invalid email or password",
+    "code": "INVALID_CREDENTIALS"
+  }
+}
+```
+
+---
+
 ## Global errors
 
 ### Unknown route
@@ -465,28 +593,36 @@ Creates a new order.
 }
 ```
 
-### Configuration
+---
 
-**The API requires the following environment variables:**
+## Configuration
+
+The API requires the following environment variables:
 
 ```txt
 NODE_ENV
 PORT
 PAYMENT_PROVIDER_API_KEY
 ```
-# Data exposure policy
+
+---
+
+## Data exposure policy
 
 API responses should only expose public fields required by clients.
 
-User responses expose:
+User responses **must expose**:
 
 ```txt
 id
 name
 email
+```
 
-User responses must not expose:
+User responses **must not expose**:
 
+```txt
 passwordHash
 internalNotes
 security-related fields
+```

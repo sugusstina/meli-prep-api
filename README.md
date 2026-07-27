@@ -108,6 +108,13 @@ GET  /api/orders
 POST /api/orders
 ```
 
+### Auth
+
+```
+POST /api/auth/register
+POST /api/auth/login
+```
+
 ## Response format
 
 Successful responses:
@@ -162,6 +169,10 @@ See [`docs/api-contract.md`](docs/api-contract.md).
 - Sensitive user fields excluded from responses
 - Manual security review documentation
 - Dependency audit script
+- User registration
+- User login
+- Password hashing with bcrypt
+- Auth request validation with Zod
 
 ## Next improvements
 
@@ -184,10 +195,12 @@ Required variables:
 NODE_ENV=development
 PORT=3000
 PAYMENT_PROVIDER_API_KEY=
+BCRYPT_SALT_ROUNDS=10
 
 The .env file should not be committed to the repository.
 
 Environment variables are validated on application startup. If a required variable is missing or invalid, the server will not start.
+
 
 ```
 ## Security notes
@@ -202,6 +215,9 @@ This project currently includes basic security-focused practices:
 - `.env` ignored by Git
 - Public serializers to avoid exposing internal fields
 - Manual security review documented in `docs/security-review.md`
+- Passwords are hashed with bcrypt before being stored
+- Login returns a generic invalid credentials error
+- Auth responses do not expose password hashes
 
 Current limitations:
 
