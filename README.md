@@ -113,6 +113,7 @@ POST /api/orders
 ```
 POST /api/auth/register
 POST /api/auth/login
+GET  /api/auth/me
 ```
 
 ## Response format
@@ -173,6 +174,9 @@ See [`docs/api-contract.md`](docs/api-contract.md).
 - User login
 - Password hashing with bcrypt
 - Auth request validation with Zod
+- JWT access token generation
+- Protected auth profile endpoint
+- Bearer token authentication middleware
 
 ## Next improvements
 
@@ -196,6 +200,8 @@ NODE_ENV=development
 PORT=3000
 PAYMENT_PROVIDER_API_KEY=
 BCRYPT_SALT_ROUNDS=10
+JWT_SECRET=
+JWT_EXPIRES_IN=1h
 
 The .env file should not be committed to the repository.
 
@@ -218,6 +224,9 @@ This project currently includes basic security-focused practices:
 - Passwords are hashed with bcrypt before being stored
 - Login returns a generic invalid credentials error
 - Auth responses do not expose password hashes
+- JWT secrets are stored in environment variables
+- Access tokens expire based on `JWT_EXPIRES_IN`
+- Protected routes require an `Authorization: Bearer <token>` header
 
 Current limitations:
 

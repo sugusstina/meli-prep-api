@@ -626,3 +626,98 @@ passwordHash
 internalNotes
 security-related fields
 ```
+
+### Register success
+
+```
+{
+  "data": {
+    "user": {
+      "id": "user_123456789",
+      "name": "Agustina",
+      "email": "agus@example.com"
+    },
+    "accessToken": "jwt_access_token"
+  },
+  "error": null
+}
+```
+
+### Login success
+
+```
+{
+  "data": {
+    "user": {
+      "id": "user_123456789",
+      "name": "Agustina",
+      "email": "agus@example.com"
+    },
+    "accessToken": "jwt_access_token"
+  },
+  "error": null
+}
+```
+
+## GET /api/auth/me
+
+Returns the currently authenticated user.
+
+Requires an Authorization header:
+
+```txt
+Authorization: Bearer <accessToken>
+```
+
+### Success response
+Status: 200 OK
+
+```
+{
+  "data": {
+    "user": {
+      "id": "user_123456789",
+      "name": "Agustina",
+      "email": "agus@example.com"
+    }
+  },
+  "error": null
+}
+```
+
+### Error response
+Status: 401 Unauthorized
+
+```
+{
+  "data": null,
+  "error": {
+    "message": "Authentication token is required",
+    "code": "AUTH_TOKEN_REQUIRED"
+  }
+}
+```
+
+Status: 401 Unauthorized
+
+```
+{
+  "data": null,
+  "error": {
+    "message": "Authorization header must use Bearer scheme",
+    "code": "INVALID_AUTH_HEADER"
+  }
+}
+```
+
+Status: 401 Unauthorized
+
+```
+{
+  "data": null,
+  "error": {
+    "message": "Invalid or expired authentication token",
+    "code": "INVALID_AUTH_TOKEN"
+  }
+}
+```

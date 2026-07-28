@@ -164,8 +164,100 @@ Possible next steps:
 
 ## 8. Authentication
 
-The API currently supports:
+### Supported Auth Endpoints
 
 ```txt
 POST /api/auth/register
 POST /api/auth/login
+```
+
+---
+
+### Password Handling
+
+- **Passwords are never stored in plaintext.**
+- All stored passwords are hashed using bcrypt.
+
+#### Registration Flow
+
+1. **Receive**: Plaintext password from the user.
+2. **Hashing**: Hash the password using bcrypt.
+3. **Storage**: Store the resulting hash as `passwordHash` internally.
+
+<details>
+<summary>Registration Password Processing (flow diagram)</summary>
+
+```
+plain password
+      ↓
+ bcrypt hash
+      ↓
+passwordHash stored internally
+```
+</details>
+
+---
+
+#### Login Flow
+
+1. **User provides** a login password.
+2. **Verification**: Use `bcrypt.compare` to check the password against the stored hash.
+
+<details>
+<summary>Login Password Verification (flow diagram)</summary>
+
+```
+plain password from request
+           ↓
+bcrypt.compare(password, stored passwordHash)
+           ↓
+   valid or invalid credentials
+```
+</details>
+
+---
+
+### Error Handling
+
+- API always returns a generic error, `INVALID_CREDENTIALS`, for both unknown emails and incorrect passwords.
+
+```json
+{
+  "data": null,
+  "error": {
+    "message": "Invalid email or password",
+    "code": "INVALID_CREDENTIALS"
+  }
+}
+```
+
+**Reason:**  
+This avoids leaking information about whether a specific email exists.
+
+## 9. Token-based authentication
+
+The API uses JWT access tokens for authenticated requests.
+
+Tokens are generated after successful register/login.
+
+The token payload currently includes:
+
+```txt
+sub
+email
+role
+```
+The token payload must not include:
+```
+password
+passwordHash
+internalNotes
+secrets
+```
+Protected routes require:
+
+Authorization: ```Bearer <accessToken>```
+
+The auth middleware verifies the token signature and expiration before allowing access.
+
+If the token is missing, malformed, invalid, or expired, the API returns ```401 Unauthorized```.

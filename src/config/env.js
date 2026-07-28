@@ -21,7 +21,16 @@ const envSchema = z.object({
     .number()
     .int("BCRYPT_SALT_ROUNDS must be an integer")
     .min(10, "BCRYPT_SALT_ROUNDS must be at least 10")
-    .default(10)
+    .default(10),
+
+  JWT_SECRET: z
+    .string()
+    .min(32, "JWT_SECRET must have at least 32 characters"),
+
+  JWT_EXPIRES_IN: z
+    .string()
+    .min(1, "JWT_EXPIRES_IN is required")
+    .default("1h")
 });
 
 const result = envSchema.safeParse(process.env);

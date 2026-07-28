@@ -7,6 +7,10 @@ import {
   findUserByEmail
 } from "./users.service.js";
 
+import {
+  generateAccessToken
+} from "./token.service.js";
+
 export async function registerUser({
   name,
   email,
@@ -17,6 +21,7 @@ export async function registerUser({
   if (existingUser) {
     return {
       user: null,
+      accessToken: null,
       error: {
         code: "EMAIL_ALREADY_IN_USE"
       }
@@ -35,8 +40,11 @@ export async function registerUser({
     role: "customer"
   });
 
+  const accessToken = generateAccessToken(newUser);
+
   return {
     user: newUser,
+    accessToken,
     error: null
   };
 }
@@ -50,6 +58,7 @@ export async function loginUser({
   if (!user) {
     return {
       user: null,
+      accessToken: null,
       error: {
         code: "INVALID_CREDENTIALS"
       }
@@ -64,14 +73,18 @@ export async function loginUser({
   if (!isPasswordValid) {
     return {
       user: null,
+      accessToken: null,
       error: {
         code: "INVALID_CREDENTIALS"
       }
     };
   }
 
+  const accessToken = generateAccessToken(user);
+
   return {
     user,
+    accessToken,
     error: null
   };
 }
