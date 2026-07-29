@@ -261,3 +261,43 @@ Authorization: ```Bearer <accessToken>```
 The auth middleware verifies the token signature and expiration before allowing access.
 
 If the token is missing, malformed, invalid, or expired, the API returns ```401 Unauthorized```.
+
+## 10. Authorization
+
+The API now supports role-based authorization.
+
+Current roles:
+
+```txt
+customer
+admin
+```
+Current protected operations:
+```
+POST /api/products
+PUT /api/products/:id
+DELETE /api/products/:id
+```
+These operations require:
+```
+Authenticated user
+Role: admin
+
+Authentication and authorization are handled separately:
+
+authMiddleware
+  ↓
+verifies the JWT and sets req.user
+
+requireRole("admin")
+  ↓
+checks whether req.user.role is allowed
+
+If a request has no valid token, the API returns:
+
+401 Unauthorized
+
+If a request has a valid token but insufficient permissions, the API returns:
+
+403 Forbidden
+```

@@ -69,6 +69,7 @@ Returns the API status.
 ### `GET /api/products`
 
 Returns all products.
+Auth required: No
 
 #### Success response
 
@@ -93,6 +94,7 @@ Returns all products.
 ### `GET /api/products/:id`
 
 Returns a product by ID.
+Auth required: No
 
 #### Success response
 
@@ -129,6 +131,8 @@ Returns a product by ID.
 ### `POST /api/products`
 
 Creates a new product.
+Auth required: Yes
+Required role: admin
 
 #### Request body
 
@@ -181,6 +185,8 @@ Creates a new product.
 ### `PUT /api/products/:id`
 
 Updates an existing product.
+Auth required: Yes
+Required role: admin
 
 #### Request body
 
@@ -191,6 +197,8 @@ Updates an existing product.
   "stock": 10
 }
 ```
+
+
 
 #### Success response
 
@@ -239,6 +247,8 @@ Updates an existing product.
 ### `DELETE /api/products/:id`
 
 Deletes an existing product.
+Auth required: Yes
+Required role: admin
 
 #### Success response
 
@@ -489,6 +499,28 @@ Creates a new user account.
 }
 ```
 
+### Status: `401 Unauthorized`
+
+```json
+{
+  "data": null,
+  "error": {
+    "message": "Authentication token is required",
+    "code": "AUTH_TOKEN_REQUIRED"
+  }
+}
+```
+
+### Status: `403 Forbidden`
+```json
+{
+  "data": null,
+  "error": {
+    "message": "You do not have permission to perform this action",
+    "code": "FORBIDDEN"
+  }
+}
+```
 ---
 
 ### `POST /api/auth/login`

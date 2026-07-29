@@ -21,7 +21,7 @@ export const users = [
     id: "user_3",
     name: "Sofía Rodríguez",
     email: "sofia@example.com",
-    passwordHash: "mock_hash_user_3",
+    passwordHash: "$2b$10$dPkmhwPkpdh9LfpdMNgoTurepgVObmWGxd8erz/qh2EBSku.U8zZq",
     role: "admin",
     internalNotes: "Internal admin user",
     createdAt: "2026-07-03T10:00:00.000Z"

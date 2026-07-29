@@ -87,11 +87,11 @@ GET /health
 ### Products
 
 ```
-GET    /api/products
-GET    /api/products/:id
-POST   /api/products
-PUT    /api/products/:id
-DELETE /api/products/:id
+GET    /api/products          public
+GET    /api/products/:id      public
+POST   /api/products          admin only
+PUT    /api/products/:id      admin only
+DELETE /api/products/:id      admin only
 ```
 
 ### Users
@@ -177,6 +177,8 @@ See [`docs/api-contract.md`](docs/api-contract.md).
 - JWT access token generation
 - Protected auth profile endpoint
 - Bearer token authentication middleware
+- Role-based authorization
+- Admin-only product mutations
 
 ## Next improvements
 
@@ -227,6 +229,9 @@ This project currently includes basic security-focused practices:
 - JWT secrets are stored in environment variables
 - Access tokens expire based on `JWT_EXPIRES_IN`
 - Protected routes require an `Authorization: Bearer <token>` header
+- Product write operations require an authenticated admin user
+- Customer users cannot create, update or delete products
+- Register does not accept role assignment from the client
 
 Current limitations:
 
