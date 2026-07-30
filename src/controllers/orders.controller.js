@@ -1,5 +1,7 @@
 import {
   getAllOrders,
+  getOrdersByUserId,
+  findOrderById,
   createOrder
 } from "../services/orders.service.js";
 
@@ -19,11 +21,52 @@ export function getOrders(req, res) {
   });
 }
 
+export function getMyOrders(req, res) {
+  const orders = getOrdersByUserId(req.user.id);
+
+  return sendSuccess(res, {
+    data: toPublicOrders(orders)
+  });
+}
+
+export function getOrderById(req, res, next) {
+  const { id } = req.params;
+
+  const order = findOrderById(id);
+
+  if (!order) {
+    return next(
+      new AppError(
+        "Order not found",
+        404,
+        "ORDER_NOT_FOUND"
+      )
+    );
+  }
+
+  const isAdmin = req.user.role === "admin";
+  const isOwner = order.userId === req.user.id;
+
+  if (!isAdmin && !isOwner) {
+    return next(
+      new AppError(
+        "You do not have permission to access this order",
+        403,
+        "FORBIDDEN"
+      )
+    );
+  }
+
+  return sendSuccess(res, {
+    data: toPublicOrder(order)
+  });
+}
+
 export function addOrder(req, res, next) {
-  const { userId, productIds } = req.validatedBody;
+  const { productIds } = req.validatedBody;
 
   const result = createOrder({
-    userId,
+    userId: req.user.id,
     productIds
   });
 

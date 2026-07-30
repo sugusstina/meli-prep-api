@@ -104,8 +104,10 @@ GET /api/users/:id
 ### Orders
 
 ```
-GET  /api/orders
-POST /api/orders
+GET  /api/orders              admin only
+GET  /api/orders/my-orders    authenticated user
+GET  /api/orders/:id          owner or admin
+POST /api/orders              authenticated user
 ```
 
 ### Auth
@@ -179,6 +181,9 @@ See [`docs/api-contract.md`](docs/api-contract.md).
 - Bearer token authentication middleware
 - Role-based authorization
 - Admin-only product mutations
+- Order ownership checks
+- Customer users can access only their own orders
+- Admin users can access all orders
 
 ## Next improvements
 
@@ -232,6 +237,9 @@ This project currently includes basic security-focused practices:
 - Product write operations require an authenticated admin user
 - Customer users cannot create, update or delete products
 - Register does not accept role assignment from the client
+- Order creation uses the authenticated user's ID from the token
+- Clients cannot assign `userId` when creating orders
+- Order access is restricted to the owner or an admin
 
 Current limitations:
 

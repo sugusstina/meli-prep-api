@@ -1,13 +1,7 @@
 import { z } from "zod";
 
-export const orderSchema = z
+export const createOrderSchema = z
   .object({
-    userId: z
-      .string()
-      .trim()
-      .min(1, "userId is required")
-      .regex(/^user_/, "userId must be a valid user id"),
-
     productIds: z
       .array(
         z

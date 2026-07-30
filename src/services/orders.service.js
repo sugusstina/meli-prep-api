@@ -6,6 +6,14 @@ export function getAllOrders() {
   return orders;
 }
 
+export function findOrderById(id) {
+  return orders.find((order) => order.id === id);
+}
+
+export function getOrdersByUserId(userId) {
+  return orders.filter((order) => order.userId === userId);
+}
+
 export function createOrder({ userId, productIds }) {
   const user = findUserById(userId);
 

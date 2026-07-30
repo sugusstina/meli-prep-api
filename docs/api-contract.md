@@ -330,13 +330,16 @@ Returns a public user by ID.
 
 ## Orders
 
-### `GET /api/orders`
+## `GET /api/orders`
 
 Returns all orders.
 
-#### Success response
+Auth required: Yes  
+Required role: admin
 
-**Status:** `200 OK`
+### Success response
+
+Status: `200 OK`
 
 ```json
 {
@@ -355,18 +358,115 @@ Returns all orders.
 
 ---
 
+## `GET /api/orders/my-orders`
+
+Returns the authenticated user's orders.
+
+Auth required: Yes
+
+### Success response
+
+Status: `200 OK`
+
+```json
+{
+  "data": [
+    {
+      "id": "order_123456789",
+      "userId": "user_1",
+      "productIds": ["prod_1", "prod_3"],
+      "status": "pending",
+      "total": 70
+    }
+  ],
+  "error": null
+}
+```
+## `GET /api/orders/:id`
+
+Returns an order by ID if the authenticated user is the owner or an admin.
+
+Auth required: Yes
+Access: owner or admin
+
+### Success response
+
+Status: `200 OK`
+
+```json
+{
+  "data": {
+    "id": "order_123456789",
+    "userId": "user_1",
+    "productIds": ["prod_1", "prod_3"],
+    "status": "pending",
+    "total": 70
+  },
+  "error": null
+}
+```
+
+### Success response
+
+Status: `200 OK`
+
+```json
+{
+  "data": [
+    {
+      "id": "order_123456789",
+      "userId": "user_1",
+      "productIds": ["prod_1", "prod_3"],
+      "status": "pending",
+      "total": 70
+    }
+  ],
+  "error": null
+}
+```
+
+### Error response
+
+Status: `404 Not Found`
+
+```json
+{
+  "data": null,
+  "error": {
+    "message": "Order not found",
+    "code": "ORDER_NOT_FOUND"
+  }
+}
+```
+
+Status: `403 Forbidden`
+
+```json
+{
+  "data": null,
+  "error": {
+    "message": "You do not have permission to access this order",
+    "code": "FORBIDDEN"
+  }
+}
+```
+
+---
+
 ### `POST /api/orders`
 
-Creates a new order.
+Creates a new order for the authenticated user.
+
+Auth required: Ye
 
 #### Request body
 
 ```json
 {
-  "userId": "user_1",
   "productIds": ["prod_1", "prod_3"]
 }
 ```
+The ```userId``` is taken from the authenticated user. Clients cannot assign orders to arbitrary users.
 
 #### Success response
 
@@ -387,6 +487,28 @@ Creates a new order.
 
 #### Error responses
 
+**Status:** `401 Unauthorized`
+
+```json
+{
+  "data": null,
+  "error": {
+    "message": "Authentication token is required",
+    "code": "AUTH_TOKEN_REQUIRED"
+  }
+}
+```
+**Status:** `403 Forbidden`
+
+```json
+{
+  "data": null,
+  "error": {
+    "message": "You do not have permission to perform this action",
+    "code": "FORBIDDEN"
+  }
+}
+```
 **Status:** `400 Bad Request`
 
 ```json

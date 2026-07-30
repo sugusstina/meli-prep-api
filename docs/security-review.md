@@ -301,3 +301,31 @@ If a request has a valid token but insufficient permissions, the API returns:
 
 403 Forbidden
 ```
+
+## 11. Resource ownership
+
+The API now enforces ownership checks for orders.
+
+Rules:
+
+```txt
+Customers can create orders only for themselves.
+Customers can view only their own orders.
+Admins can view all orders.
+Admins can view any order by ID.
+```
+
+Order creation does not accept ```userId``` from the client.
+
+Instead, the API uses:
+
+```req.user.id```
+
+This prevents authenticated customers from creating orders on behalf of another user.
+
+Order access uses both role and ownership:
+```
+admin → can access any order
+owner → can access their own order
+other customer → forbidden
+```

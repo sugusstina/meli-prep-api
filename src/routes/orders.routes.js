@@ -1,15 +1,44 @@
 import { Router } from "express";
+
 import {
   getOrders,
+  getMyOrders,
+  getOrderById,
   addOrder
 } from "../controllers/orders.controller.js";
 
 import { validateBody } from "../middlewares/validate.middleware.js";
-import { orderSchema } from "../schemas/order.schema.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { requireRole } from "../middlewares/role.middleware.js";
+
+import { createOrderSchema } from "../schemas/order.schema.js";
 
 const router = Router();
 
-router.get("/", getOrders);
-router.post("/", validateBody(orderSchema), addOrder);
+router.get(
+  "/",
+  authMiddleware,
+  requireRole("admin"),
+  getOrders
+);
+
+router.get(
+  "/my-orders",
+  authMiddleware,
+  getMyOrders
+);
+
+router.get(
+  "/:id",
+  authMiddleware,
+  getOrderById
+);
+
+router.post(
+  "/",
+  authMiddleware,
+  validateBody(createOrderSchema),
+  addOrder
+);
 
 export default router;
