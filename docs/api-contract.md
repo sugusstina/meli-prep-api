@@ -875,3 +875,19 @@ Status: 401 Unauthorized
   }
 }
 ```
+
+# Auth and permission summary
+```
+| Endpoint | Auth required | Permission |
+|---|---:|---|
+| GET /api/products | No | Public |
+| GET /api/products/:id | No | Public |
+| POST /api/products | Yes | Admin |
+| PUT /api/products/:id | Yes | Admin |
+| DELETE /api/products/:id | Yes | Admin |
+| GET /api/orders | Yes | Admin |
+| GET /api/orders/my-orders | Yes | Current user |
+| GET /api/orders/:id | Yes | Owner or Admin |
+| POST /api/orders | Yes | Current user |
+| GET /api/auth/me | Yes | Current user |
+```

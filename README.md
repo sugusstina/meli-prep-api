@@ -249,3 +249,51 @@ Current limitations:
 - No automated tests yet
 - No rate limiting yet
 - No security headers yet
+
+### Auth
+
+```txt
+POST /api/auth/register
+POST /api/auth/login
+GET  /api/auth/me
+```
+
+
+## Product permissions
+
+
+### Products
+
+```txt
+GET    /api/products          public
+GET    /api/products/:id      public
+POST   /api/products          admin only
+PUT    /api/products/:id      admin only
+DELETE /api/products/:id      admin only
+```
+
+## Order permissions
+
+
+### Orders
+
+```txt
+GET  /api/orders              admin only
+GET  /api/orders/my-orders    authenticated user
+GET  /api/orders/:id          owner or admin
+POST /api/orders              authenticated user
+```
+
+
+## Current features
+```
+- User registration and login
+- Password hashing with bcrypt
+- JWT access tokens
+- Auth middleware
+- Role-based authorization
+- Admin-only product mutations
+- Order ownership checks
+- Public serializers for API responses
+```
+
