@@ -240,6 +240,8 @@ This project currently includes basic security-focused practices:
 - Order creation uses the authenticated user's ID from the token
 - Clients cannot assign `userId` when creating orders
 - Order access is restricted to the owner or an admin
+- Helmet is used to set security-related HTTP headers
+- Express `X-Powered-By` header is disabled
 
 Current limitations:
 
@@ -295,5 +297,7 @@ POST /api/orders              authenticated user
 - Admin-only product mutations
 - Order ownership checks
 - Public serializers for API responses
+- HTTP security headers with Helmet
+- `X-Powered-By` disabled
 ```
 

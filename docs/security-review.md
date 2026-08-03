@@ -329,3 +329,14 @@ admin → can access any order
 owner → can access their own order
 other customer → forbidden
 ```
+
+## 12. HTTP security headers
+
+The API uses Helmet to configure security-related HTTP response headers.
+
+Helmet is applied globally before routes.
+
+The API also disables the Express `X-Powered-By` header:
+
+```js
+app.disable("x-powered-by");

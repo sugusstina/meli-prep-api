@@ -15,8 +15,15 @@ import {
   errorHandler
 } from "./middlewares/error.middleware.js";
 
+import {
+  securityHeaders
+} from "./middlewares/security.middleware.js";
+
 const app = express();
 
+app.disable("x-powered-by");
+
+app.use(securityHeaders);
 app.use(cors());
 app.use(express.json());
 
