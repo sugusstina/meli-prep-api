@@ -60,3 +60,35 @@ Add rate limiting to auth endpoints.
 Review error responses.
 Review production deployment settings.
 ```
+
+## 6. CORS
+
+The API uses a restricted CORS configuration.
+
+Allowed origin:
+
+```txt
+FRONTEND_URL
+```
+The value is configured through environment variables.
+
+Requests with no Origin header are allowed so tools like curl, Postman and server-to-server requests can still access the API.
+
+Requests from origins not included in the allowlist are rejected with:
+
+```CORS_ORIGIN_NOT_ALLOWED```
+
+Current allowed methods:
+```
+GET
+POST
+PUT
+DELETE
+OPTIONS
+```
+Current allowed headers:
+```
+Content-Type
+Authorization
+```
+The API currently uses bearer tokens in the Authorization header and does not require cookie credentials.

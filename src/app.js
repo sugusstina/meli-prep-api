@@ -1,11 +1,18 @@
 import express from "express";
-import cors from "cors";
 
 import healthRoutes from "./routes/health.routes.js";
 import productsRoutes from "./routes/products.routes.js";
 import usersRoutes from "./routes/users.routes.js";
 import ordersRoutes from "./routes/orders.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+
+import {
+  securityHeaders
+} from "./middlewares/security.middleware.js";
+
+import {
+  corsMiddleware
+} from "./middlewares/cors.middleware.js";
 
 import {
   notFoundHandler
@@ -15,16 +22,12 @@ import {
   errorHandler
 } from "./middlewares/error.middleware.js";
 
-import {
-  securityHeaders
-} from "./middlewares/security.middleware.js";
-
 const app = express();
 
 app.disable("x-powered-by");
 
 app.use(securityHeaders);
-app.use(cors());
+app.use(corsMiddleware);
 app.use(express.json());
 
 app.use("/health", healthRoutes);

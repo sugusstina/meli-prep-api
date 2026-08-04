@@ -30,8 +30,14 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z
     .string()
     .min(1, "JWT_EXPIRES_IN is required")
-    .default("1h")
+    .default("1h"),
+
+    FRONTEND_URL: z
+    .string()
+    .url("FRONTEND_URL must be a valid URL")
+    .default("http://localhost:5173")
 });
+
 
 const result = envSchema.safeParse(process.env);
 

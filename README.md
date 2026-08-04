@@ -209,6 +209,7 @@ PAYMENT_PROVIDER_API_KEY=
 BCRYPT_SALT_ROUNDS=10
 JWT_SECRET=
 JWT_EXPIRES_IN=1h
+FRONTEND_URL=http://localhost:5173
 
 The .env file should not be committed to the repository.
 
@@ -242,6 +243,9 @@ This project currently includes basic security-focused practices:
 - Order access is restricted to the owner or an admin
 - Helmet is used to set security-related HTTP headers
 - Express `X-Powered-By` header is disabled
+- CORS is restricted to the configured frontend origin
+- Requests without an `Origin` header are allowed for non-browser clients
+- Allowed CORS headers include `Content-Type` and `Authorization`
 
 Current limitations:
 
@@ -299,5 +303,6 @@ POST /api/orders              authenticated user
 - Public serializers for API responses
 - HTTP security headers with Helmet
 - `X-Powered-By` disabled
+- Restricted CORS configuration with allowed frontend origin
 ```
 

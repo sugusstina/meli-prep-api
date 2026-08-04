@@ -340,3 +340,26 @@ The API also disables the Express `X-Powered-By` header:
 
 ```js
 app.disable("x-powered-by");
+```
+
+## 13. CORS
+
+The API uses a restricted ```CORS``` configuration.
+
+Allowed origins are configured through environment variables.
+
+Current setting:
+
+```txt
+FRONTEND_URL
+```
+
+Requests without an Origin header are allowed to support curl, Postman and server-to-server requests.
+
+Requests from origins outside the allowlist are rejected with:
+```
+CORS_ORIGIN_NOT_ALLOWED
+```
+```CORS``` is not used as an authentication or authorization mechanism.
+
+It only controls whether browsers allow frontend JavaScript from another origin to read API responses.
