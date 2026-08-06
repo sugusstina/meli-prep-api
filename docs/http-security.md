@@ -116,3 +116,36 @@ The rate limiter is applied before request body validation so malformed login at
 Current implementation uses the default in-memory store, which is acceptable for local development.
 
 For production, a shared store such as Redis would be preferred when running multiple server instances.
+
+## 8. Error hardening and request IDs
+
+The API attaches a request ID to every request.
+
+The request ID is available in:
+
+```txt
+X-Request-Id response header
+error.requestId response body
+server logs
+```
+
+If the client sends an ```X-Request-Id``` header, the API reuses it.
+
+Otherwise, the API generates a new ```UUID```.
+
+Error responses include a request ID so client-side errors can be correlated with server logs.
+
+Unexpected errors return a generic response:
+```js
+{
+  "data": null,
+  "error": {
+    "message": "Internal server error",
+    "code": "INTERNAL_SERVER_ERROR",
+    "requestId": "request-id"
+  }
+}
+```
+Sensitive headers such as Authorization and Cookie are redacted from logs.
+
+Debug information such as stack traces should only be exposed in development mode.

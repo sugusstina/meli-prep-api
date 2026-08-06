@@ -186,6 +186,11 @@ See [`docs/api-contract.md`](docs/api-contract.md).
 - Admin users can access all orders
 - Login rate limiting
 - `429 Too Many Requests` response for repeated login attempts
+- Request ID middleware
+- `X-Request-Id` response header
+- Error responses include `requestId`
+- Basic structured error logging
+- Sensitive header redaction in logs
 
 ## Next improvements
 
@@ -253,6 +258,10 @@ This project currently includes basic security-focused practices:
 - Login attempts are rate limited to reduce brute-force risk
 - The login limiter is configurable through environment variables
 - The current limiter uses in-memory storage for local development
+- Unexpected errors return generic messages to clients
+- Error responses include request IDs for debugging
+- Authorization and Cookie headers are redacted from logs
+- Stack traces are not intended to be exposed in production
 
 Current limitations:
 

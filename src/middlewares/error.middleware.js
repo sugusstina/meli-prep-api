@@ -1,4 +1,30 @@
 import { AppError } from "../errors/AppError.js";
+import { env } from "../config/env.js";
+import { logError } from "../utils/logger.js";
+
+function getValidationDetails(error) {
+  if (!error.details) {
+    return {};
+  }
+
+  return {
+    details: error.details
+  };
+}
+
+function getDevelopmentDetails(error, isKnownError) {
+  if (env.NODE_ENV !== "development") {
+    return {};
+  }
+
+  return {
+    debug: {
+      name: error.name,
+      isKnownError,
+      stack: error.stack
+    }
+  };
+}
 
 export function errorHandler(error, req, res, next) {
   if (res.headersSent) {
@@ -11,11 +37,24 @@ export function errorHandler(error, req, res, next) {
     "body" in error;
 
   if (isInvalidJson) {
+    const invalidJsonError = new AppError(
+      "The request body contains invalid JSON",
+      400,
+      "INVALID_JSON"
+    );
+
+    logError(invalidJsonError, req);
+
     return res.status(400).json({
       data: null,
       error: {
-        message: "The request body contains invalid JSON",
-        code: "INVALID_JSON"
+        message: invalidJsonError.message,
+        code: invalidJsonError.code,
+        requestId: req.requestId,
+        ...getDevelopmentDetails(
+          invalidJsonError,
+          true
+        )
       }
     });
   }
@@ -26,24 +65,28 @@ export function errorHandler(error, req, res, next) {
     ? error.statusCode
     : 500;
 
-  if (!isKnownError) {
-    console.error(error);
-  }
+  const responseError = {
+    message: isKnownError
+      ? error.message
+      : "Internal server error",
+
+    code: isKnownError
+      ? error.code
+      : "INTERNAL_SERVER_ERROR",
+
+    requestId: req.requestId,
+
+    ...(isKnownError
+      ? getValidationDetails(error)
+      : {}),
+
+    ...getDevelopmentDetails(error, isKnownError)
+  };
+
+  logError(error, req);
 
   return res.status(statusCode).json({
     data: null,
-    error: {
-      message: isKnownError
-        ? error.message
-        : "Internal server error",
-
-      code: isKnownError
-        ? error.code
-        : "INTERNAL_SERVER_ERROR",
-
-      ...(isKnownError && error.details
-        ? { details: error.details }
-        : {})
-    }
+    error: responseError
   });
 }

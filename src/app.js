@@ -22,10 +22,15 @@ import {
   errorHandler
 } from "./middlewares/error.middleware.js";
 
+import {
+  requestIdMiddleware
+} from "./middlewares/request-id.middleware.js";
+
 const app = express();
 
 app.disable("x-powered-by");
 
+app.use(requestIdMiddleware);
 app.use(securityHeaders);
 app.use(corsMiddleware);
 app.use(express.json());

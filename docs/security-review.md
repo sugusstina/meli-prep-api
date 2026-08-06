@@ -394,3 +394,39 @@ Use Redis or another shared store.
 Add monitoring for repeated failed login attempts.
 Consider additional protections for credential stuffing.
 ```
+
+## 15. Error hardening and logging
+
+The API uses centralized error handling.
+
+Error responses include:
+
+```txt
+message
+code
+requestId
+```
+
+Known operational errors may also include safe details, such as validation errors.
+
+Unexpected errors return:
+```
+INTERNAL_SERVER_ERROR
+```
+without exposing internal implementation details to clients.
+
+Each request receives a request ID.
+
+The request ID is included in:
+```
+X-Request-Id response header
+error responses
+server logs
+```
+
+The logger redacts sensitive headers:
+```
+Authorization
+Cookie
+```
+This helps correlate client-reported errors with server logs without leaking sensitive credentials.
