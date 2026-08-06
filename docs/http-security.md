@@ -92,3 +92,27 @@ Content-Type
 Authorization
 ```
 The API currently uses bearer tokens in the Authorization header and does not require cookie credentials.
+
+## 7. Login rate limiting
+
+The API applies rate limiting to:
+
+```txt
+POST /api/auth/login
+```
+
+Current configuration:
+```
+LOGIN_RATE_LIMIT_WINDOW_MS
+LOGIN_RATE_LIMIT_MAX
+```
+If the limit is exceeded, the API returns:
+```
+429 Too Many Requests
+TOO_MANY_LOGIN_ATTEMPTS
+```
+The rate limiter is applied before request body validation so malformed login attempts are also limited.
+
+Current implementation uses the default in-memory store, which is acceptable for local development.
+
+For production, a shared store such as Redis would be preferred when running multiple server instances.

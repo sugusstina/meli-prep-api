@@ -32,10 +32,24 @@ const envSchema = z.object({
     .min(1, "JWT_EXPIRES_IN is required")
     .default("1h"),
 
-    FRONTEND_URL: z
+  FRONTEND_URL: z
     .string()
     .url("FRONTEND_URL must be a valid URL")
-    .default("http://localhost:5173")
+    .default("http://localhost:5173"),
+
+  LOGIN_RATE_LIMIT_WINDOW_MS: z
+    .coerce
+    .number()
+    .int("LOGIN_RATE_LIMIT_WINDOW_MS must be an integer")
+    .positive("LOGIN_RATE_LIMIT_WINDOW_MS must be greater than 0")
+    .default(900000),
+
+  LOGIN_RATE_LIMIT_MAX: z
+    .coerce
+    .number()
+    .int("LOGIN_RATE_LIMIT_MAX must be an integer")
+    .positive("LOGIN_RATE_LIMIT_MAX must be greater than 0")
+    .default(5)
 });
 
 

@@ -184,6 +184,8 @@ See [`docs/api-contract.md`](docs/api-contract.md).
 - Order ownership checks
 - Customer users can access only their own orders
 - Admin users can access all orders
+- Login rate limiting
+- `429 Too Many Requests` response for repeated login attempts
 
 ## Next improvements
 
@@ -210,6 +212,8 @@ BCRYPT_SALT_ROUNDS=10
 JWT_SECRET=
 JWT_EXPIRES_IN=1h
 FRONTEND_URL=http://localhost:5173
+LOGIN_RATE_LIMIT_WINDOW_MS=900000
+LOGIN_RATE_LIMIT_MAX=5
 
 The .env file should not be committed to the repository.
 
@@ -246,6 +250,9 @@ This project currently includes basic security-focused practices:
 - CORS is restricted to the configured frontend origin
 - Requests without an `Origin` header are allowed for non-browser clients
 - Allowed CORS headers include `Content-Type` and `Authorization`
+- Login attempts are rate limited to reduce brute-force risk
+- The login limiter is configurable through environment variables
+- The current limiter uses in-memory storage for local development
 
 Current limitations:
 

@@ -8,13 +8,16 @@ import {
 
 import { validateBody } from "../middlewares/validate.middleware.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { loginRateLimiter } from "../middlewares/rate-limit.middleware.js";
 
 import {
   loginSchema,
   registerSchema
 } from "../schemas/auth.schema.js";
 
+
 import { asyncHandler } from "../utils/async-handler.js";
+
 
 const router = Router();
 
@@ -26,6 +29,7 @@ router.post(
 
 router.post(
   "/login",
+  loginRateLimiter,
   validateBody(loginSchema),
   asyncHandler(login)
 );

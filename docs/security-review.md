@@ -363,3 +363,34 @@ CORS_ORIGIN_NOT_ALLOWED
 ```CORS``` is not used as an authentication or authorization mechanism.
 
 It only controls whether browsers allow frontend JavaScript from another origin to read API responses.
+
+## 14. Login rate limiting
+
+The API applies rate limiting to the login endpoint:
+
+```txt
+POST /api/auth/login
+```
+This helps reduce brute-force and password guessing attempts.
+
+Current behavior:
+```
+Too many login attempts
+  ↓
+429 Too Many Requests
+  ↓
+TOO_MANY_LOGIN_ATTEMPTS
+```
+The limiter is configured through environment variables:
+```
+LOGIN_RATE_LIMIT_WINDOW_MS
+LOGIN_RATE_LIMIT_MAX
+```
+The limiter currently uses in-memory storage, which is acceptable for local development.
+
+Production improvements:
+```
+Use Redis or another shared store.
+Add monitoring for repeated failed login attempts.
+Consider additional protections for credential stuffing.
+```
