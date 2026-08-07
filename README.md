@@ -322,3 +322,31 @@ POST /api/orders              authenticated user
 - Restricted CORS configuration with allowed frontend origin
 ```
 
+## Security hardening
+
+The API currently includes:
+```
+- Request validation with Zod
+- Centralized error handling
+- Environment variable validation
+- Password hashing with bcrypt
+- JWT authentication
+- Role-based authorization
+- Order ownership checks
+- Public serializers for API responses
+- HTTP security headers with Helmet
+- Restricted CORS configuration
+- Login rate limiting
+- Request IDs
+- Structured error logging
+- Sensitive header redaction in logs
+```
+Current limitations:
+```
+- Data is stored in memory
+- No real database yet
+- No refresh token flow
+- No token revocation
+- No production-grade logger yet
+- Rate limiting uses in-memory storage
+```

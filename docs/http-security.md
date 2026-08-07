@@ -149,3 +149,25 @@ Unexpected errors return a generic response:
 Sensitive headers such as Authorization and Cookie are redacted from logs.
 
 Debug information such as stack traces should only be exposed in development mode.
+
+## 9. Week 4 Security QA
+
+Manual QA was documented in:
+
+```txt
+docs/week-4-security-qa.md
+```
+
+## The QA covers:
+```
+Helmet headers
+CORS allowlist
+Login rate limiting
+Auth errors
+Role permissions
+Order ownership
+Request IDs
+Error hardening
+Sensitive log redaction
+Dependency audit
+```

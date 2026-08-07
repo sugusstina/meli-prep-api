@@ -430,3 +430,35 @@ Authorization
 Cookie
 ```
 This helps correlate client-reported errors with server logs without leaking sensitive credentials.
+
+## 16. Week 4 security hardening summary
+
+Week 4 added HTTP and operational hardening around the existing API.
+
+Implemented protections:
+
+```txt
+Helmet security headers
+Disabled X-Powered-By
+Restricted CORS allowlist
+Login rate limiting
+Request IDs
+Hardened error responses
+Structured error logging
+Sensitive header redaction
+```
+
+These protections complement the existing API-level security layers:
+```
+Zod validation
+JWT authentication
+Role-based authorization
+Resource ownership
+Public serializers
+Environment validation
+```
+Manual QA is documented in:
+
+```
+docs/week-4-security-qa.md
+```
