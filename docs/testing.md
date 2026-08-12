@@ -35,6 +35,7 @@ tests/
   integration/
     health.test.js
     products-public.test.js
+    products-auth.test.js
     errors.test.js
     auth.test.js
 ```
@@ -105,3 +106,22 @@ GET /api/auth/me returns AUTH_TOKEN_REQUIRED without token.
 GET /api/auth/me returns INVALID_AUTH_TOKEN with invalid token.
 GET /api/auth/me returns the current public user with a valid token.
 ```
+
+## Product authorization tests
+
+Current product authorization test coverage includes:
+
+```txt
+POST /api/products returns AUTH_TOKEN_REQUIRED without token.
+POST /api/products returns FORBIDDEN for customer users.
+POST /api/products creates products for admin users.
+PUT /api/products/:id returns AUTH_TOKEN_REQUIRED without token.
+PUT /api/products/:id returns FORBIDDEN for customer users.
+PUT /api/products/:id updates products for admin users.
+DELETE /api/products/:id returns AUTH_TOKEN_REQUIRED without token.
+DELETE /api/products/:id returns FORBIDDEN for customer users.
+DELETE /api/products/:id deletes products for admin users.
+```
+
+These tests verify that product mutations require authentication and admin role authorization.
+

@@ -192,6 +192,7 @@ See [`docs/api-contract.md`](docs/api-contract.md).
 - Basic structured error logging
 - Sensitive header redaction in logs
 - Automated API tests with Vitest and Supertest
+- Automated authorization tests for product mutations
 
 ## Next improvements
 
@@ -394,4 +395,15 @@ Auth /me
 JWT access token responses
 Auth validation errors
 Password hash exposure checks
+```
+
+Product authorization:
+
+```txt
+POST /api/products admin-only behavior
+PUT /api/products/:id admin-only behavior
+DELETE /api/products/:id admin-only behavior
+401 for missing token
+403 for customer users
+success for admin users
 ```
