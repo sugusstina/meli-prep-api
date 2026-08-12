@@ -378,3 +378,20 @@ Request IDs
 X-Powered-By header
 ```
 
+Current test coverage includes:
+
+```txt
+GET /health
+GET /api/products
+GET /api/products/:id
+Unknown routes
+Invalid JSON
+Request IDs
+X-Powered-By header
+Auth register
+Auth login
+Auth /me
+JWT access token responses
+Auth validation errors
+Password hash exposure checks
+```

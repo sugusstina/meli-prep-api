@@ -30,10 +30,13 @@ npm run test:watch
 tests/
   setup/
     env.js
+  helpers/
+    auth.js
   integration/
     health.test.js
     products-public.test.js
     errors.test.js
+    auth.test.js
 ```
 
 ## 4. Environment setup
@@ -82,4 +85,23 @@ Order ownership
 Rate limiting
 CORS
 Error hardening
+```
+
+## Auth tests
+
+Current auth test coverage includes:
+
+```txt
+POST /api/auth/register creates a user.
+POST /api/auth/register returns an access token.
+POST /api/auth/register does not expose passwordHash.
+POST /api/auth/register rejects duplicated emails.
+POST /api/auth/register validates invalid payloads.
+POST /api/auth/register rejects role assignment from client.
+POST /api/auth/login returns an access token for valid credentials.
+POST /api/auth/login returns INVALID_CREDENTIALS for wrong password.
+POST /api/auth/login returns INVALID_CREDENTIALS for unknown email.
+GET /api/auth/me returns AUTH_TOKEN_REQUIRED without token.
+GET /api/auth/me returns INVALID_AUTH_TOKEN with invalid token.
+GET /api/auth/me returns the current public user with a valid token.
 ```
