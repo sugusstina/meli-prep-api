@@ -191,6 +191,7 @@ See [`docs/api-contract.md`](docs/api-contract.md).
 - Error responses include `requestId`
 - Basic structured error logging
 - Sensitive header redaction in logs
+- Automated API tests with Vitest and Supertest
 
 ## Next improvements
 
@@ -350,3 +351,30 @@ Current limitations:
 - No production-grade logger yet
 - Rate limiting uses in-memory storage
 ```
+
+## Testing
+
+The project uses Vitest and Supertest for automated API tests.
+
+Run tests once:
+
+```bash
+npm test
+```
+
+Run tests in watch mode:
+```bash
+npm run test:watch
+```
+
+Current test coverage includes:
+```
+GET /health
+GET /api/products
+GET /api/products/:id
+Unknown routes
+Invalid JSON
+Request IDs
+X-Powered-By header
+```
+
