@@ -194,6 +194,10 @@ See [`docs/api-contract.md`](docs/api-contract.md).
 - Automated API tests with Vitest and Supertest
 - Automated authorization tests for product mutations
 - Automated ownership tests for orders
+- Automated API integration tests with Vitest and Supertest
+- Automated auth tests
+- Automated role-based authorization tests
+- Automated order ownership tests
 
 ## Next improvements
 
