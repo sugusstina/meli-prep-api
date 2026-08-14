@@ -193,6 +193,7 @@ See [`docs/api-contract.md`](docs/api-contract.md).
 - Sensitive header redaction in logs
 - Automated API tests with Vitest and Supertest
 - Automated authorization tests for product mutations
+- Automated ownership tests for orders
 
 ## Next improvements
 
@@ -368,18 +369,7 @@ Run tests in watch mode:
 npm run test:watch
 ```
 
-Current test coverage includes:
-```
-GET /health
-GET /api/products
-GET /api/products/:id
-Unknown routes
-Invalid JSON
-Request IDs
-X-Powered-By header
-```
-
-Current test coverage includes:
+### Current test coverage includes:
 
 ```txt
 GET /health
@@ -395,6 +385,15 @@ Auth /me
 JWT access token responses
 Auth validation errors
 Password hash exposure checks
+Order authorization and ownership:
+
+POST /api/orders authenticated-only behavior
+POST /api/orders rejects userId in body
+GET /api/orders admin-only behavior
+GET /api/orders/my-orders current user behavior
+GET /api/orders/:id owner or admin behavior
+403 for non-owner customers
+404 for unknown orders
 ```
 
 Product authorization:

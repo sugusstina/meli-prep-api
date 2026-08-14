@@ -38,6 +38,7 @@ tests/
     products-auth.test.js
     errors.test.js
     auth.test.js
+    orders-auth.test.js
 ```
 
 ## 4. Environment setup
@@ -125,3 +126,23 @@ DELETE /api/products/:id deletes products for admin users.
 
 These tests verify that product mutations require authentication and admin role authorization.
 
+## Order authorization and ownership tests
+
+Current order authorization test coverage includes:
+
+```txt
+POST /api/orders returns AUTH_TOKEN_REQUIRED without token.
+POST /api/orders creates an order for the authenticated user.
+POST /api/orders rejects userId in the request body.
+GET /api/orders returns AUTH_TOKEN_REQUIRED without token.
+GET /api/orders returns FORBIDDEN for customer users.
+GET /api/orders returns all orders for admin users.
+GET /api/orders/my-orders returns AUTH_TOKEN_REQUIRED without token.
+GET /api/orders/my-orders returns only the authenticated user's orders.
+GET /api/orders/:id returns the order for the owner.
+GET /api/orders/:id returns FORBIDDEN for another customer.
+GET /api/orders/:id returns the order for an admin.
+GET /api/orders/:id returns ORDER_NOT_FOUND for unknown orders.
+```
+
+These tests verify role-based access and ownership rules for orders.
