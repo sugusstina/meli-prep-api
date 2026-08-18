@@ -49,7 +49,11 @@ const envSchema = z.object({
     .number()
     .int("LOGIN_RATE_LIMIT_MAX must be an integer")
     .positive("LOGIN_RATE_LIMIT_MAX must be greater than 0")
-    .default(5)
+    .default(5),
+
+    DATABASE_URL: z
+    .string()
+    .min(1, "DATABASE_URL is required")
 });
 
 

@@ -9,12 +9,17 @@
     "test:watch": "vitest",
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "audit": "npm audit"
+    "audit": "npm audit",
+    "db:test": "node scripts/test-db-connection.js",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -26,6 +31,7 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.14",
+    "prisma": "^6.12.0",
     "supertest": "^7.2.2",
     "vitest": "^4.1.10"
   }

@@ -198,6 +198,8 @@ See [`docs/api-contract.md`](docs/api-contract.md).
 - Automated auth tests
 - Automated role-based authorization tests
 - Automated order ownership tests
+- Prisma ORM configured with SQLite
+- Initial database schema for users, products, orders and order items
 
 ## Next improvements
 
@@ -409,4 +411,48 @@ DELETE /api/products/:id admin-only behavior
 401 for missing token
 403 for customer users
 success for admin users
+```
+
+## Database
+
+The project uses Prisma ORM with SQLite for local persistence.
+
+### Environment variable
+
+```env
+DATABASE_URL="file:./dev.db"
+```
+
+Commands
+
+Generate Prisma Client:
+```
+npm run db:generate
+```
+Run migrations:
+```
+npm run db:migrate
+```
+Test database connection:
+```
+npm run db:test
+```
+Open Prisma Studio:
+```
+npm run db:studio
+```
+
+Current models
+```
+User
+Product
+Order
+OrderItem
+```
+Current status:
+```
+Prisma and SQLite are configured.
+The database schema exists.
+The API still uses in-memory data.
+Services will be migrated gradually.
 ```
