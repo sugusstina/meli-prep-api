@@ -14,18 +14,18 @@ import {
   toPublicProducts
 } from "../serializers/product.serializer.js";
 
-export function getProducts(req, res) {
-  const products = getAllProducts();
+export async function getProducts(req, res) {
+  const products = await getAllProducts();
 
   return sendSuccess(res, {
     data: toPublicProducts(products)
   });
 }
 
-export function getProductById(req, res, next) {
+export async function getProductById(req, res, next) {
   const { id } = req.params;
 
-  const product = findProductById(id);
+  const product = await findProductById(id);
 
   if (!product) {
     return next(
@@ -42,10 +42,10 @@ export function getProductById(req, res, next) {
   });
 }
 
-export function addProduct(req, res) {
+export async function addProduct(req, res) {
   const { name, price, stock } = req.validatedBody;
 
-  const newProduct = createProduct({
+  const newProduct = await createProduct({
     name,
     price,
     stock
@@ -57,11 +57,11 @@ export function addProduct(req, res) {
   });
 }
 
-export function updateProduct(req, res, next) {
+export async function updateProduct(req, res, next) {
   const { id } = req.params;
   const { name, price, stock } = req.validatedBody;
 
-  const updatedProduct = updateProductById(id, {
+  const updatedProduct = await updateProductById(id, {
     name,
     price,
     stock
@@ -82,10 +82,10 @@ export function updateProduct(req, res, next) {
   });
 }
 
-export function removeProduct(req, res, next) {
+export async function removeProduct(req, res, next) {
   const { id } = req.params;
 
-  const deletedProduct = deleteProductById(id);
+  const deletedProduct = await deleteProductById(id);
 
   if (!deletedProduct) {
     return next(
