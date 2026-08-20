@@ -1,4 +1,3 @@
-import { products } from "../data/products.js";
 import { prisma } from "../db/prisma.js";
 
 export async function getAllProducts() {
@@ -13,43 +12,48 @@ export async function findProductById(id) {
   });
 }
 
-export function createProduct(productData) {
-  const newProduct = {
-    id: `prod_${Date.now()}`,
-    ...productData
-  };
-
-  products.push(newProduct);
-
-  return newProduct;
+export async function createProduct(productData) {
+  return prisma.product.create({
+    data: {
+      id: `prod_${Date.now()}`,
+      ...productData
+    }
+  });
 }
 
-export function updateProductById(id, productData) {
-  const productIndex = products.findIndex((product) => product.id === id);
+export async function updateProductById(id, productData) {
+  const existingProduct = await prisma.product.findUnique({
+    where: {
+      id
+    }
+  });
 
-  if (productIndex === -1) {
+  if (!existingProduct) {
     return null;
   }
 
-  const updatedProduct = {
-    ...products[productIndex],
-    ...productData,
-    id
-  };
-
-  products[productIndex] = updatedProduct;
-
-  return updatedProduct;
+  return prisma.product.update({
+    where: {
+      id
+    },
+    data: productData
+  });
 }
 
-export function deleteProductById(id) {
-  const productIndex = products.findIndex((product) => product.id === id);
+export async function deleteProductById(id) {
+  const existingProduct = await prisma.product.findUnique({
+    where: {
+      id
+    }
+  });
 
-  if (productIndex === -1) {
+  if (!existingProduct) {
     return null;
   }
 
-  const [deletedProduct] = products.splice(productIndex, 1);
-
-  return deletedProduct;
+  return prisma.product.delete({
+    where: {
+      id
+    }
+  });
 }
