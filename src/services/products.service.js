@@ -1,7 +1,45 @@
 import { prisma } from "../db/prisma.js";
 
-export async function getAllProducts() {
-  return prisma.product.findMany();
+export async function getAllProducts({
+  search,
+  minPrice,
+  maxPrice,
+  sortBy,
+  order,
+  page,
+  limit
+}) {
+  const where = {};
+
+  if (search) {
+    where.name = {
+      contains: search
+    };
+  }
+
+  if (minPrice !== undefined || maxPrice !== undefined) {
+    where.price = {};
+
+    if (minPrice !== undefined) {
+      where.price.gte = minPrice;
+    }
+
+    if (maxPrice !== undefined) {
+      where.price.lte = maxPrice;
+    }
+  }
+
+  return prisma.product.findMany({
+    where,
+
+    orderBy: {
+      [sortBy]: order
+    },
+
+    skip: (page - 1) * limit,
+
+    take: limit
+  });
 }
 
 export async function findProductById(id) {

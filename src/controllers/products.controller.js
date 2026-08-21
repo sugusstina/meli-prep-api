@@ -15,7 +15,39 @@ import {
 } from "../serializers/product.serializer.js";
 
 export async function getProducts(req, res) {
-  const products = await getAllProducts();
+  const {
+    search,
+    minPrice,
+    maxPrice,
+    sortBy = "name",
+    order = "asc",
+    page = "1",
+    limit = "10"
+  } = req.query;
+
+  const allowedSortFields = [
+    "name",
+    "price",
+    "stock"
+  ];
+
+  const safeSortBy = allowedSortFields.includes(sortBy)
+    ? sortBy
+    : "name";
+
+  const safeOrder = order === "desc"
+    ? "desc"
+    : "asc";
+
+  const products = await getAllProducts({
+    search,
+    minPrice: minPrice ? Number(minPrice) : undefined,
+    maxPrice: maxPrice ? Number(maxPrice) : undefined,
+    sortBy: safeSortBy,
+    order: safeOrder,
+    page: Number(page),
+    limit: Number(limit)
+  });
 
   return sendSuccess(res, {
     data: toPublicProducts(products)
