@@ -1,34 +1,38 @@
-import { users } from "../data/users.js";
+import { prisma } from "../db/prisma.js";
 
-export function getAllUsers() {
-  return users;
+export async function getAllUsers() {
+  return prisma.user.findMany();
 }
 
-export function findUserById(id) {
-  return users.find((user) => user.id === id);
+export async function findUserById(id) {
+  return prisma.user.findUnique({
+    where: {
+      id
+    }
+  });
 }
 
-export function findUserByEmail(email) {
-  return users.find((user) => user.email === email);
+export async function findUserByEmail(email) {
+  return prisma.user.findUnique({
+    where: {
+      email
+    }
+  });
 }
 
-export function createUser({
+export async function createUser({
   name,
   email,
   passwordHash,
   role = "customer"
 }) {
-  const newUser = {
-    id: `user_${Date.now()}`,
-    name,
-    email,
-    passwordHash,
-    role,
-    internalNotes: "",
-    createdAt: new Date().toISOString()
-  };
-
-  users.push(newUser);
-
-  return newUser;
+  return prisma.user.create({
+    data: {
+      id: `user_${Date.now()}`,
+      name,
+      email,
+      passwordHash,
+      role
+    }
+  });
 }

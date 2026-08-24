@@ -8,7 +8,7 @@ import {
   findUserById
 } from "../services/users.service.js";
 
-export function authMiddleware(req, res, next) {
+export async function authMiddleware(req, res, next) {
   const authorizationHeader = req.headers.authorization;
 
   if (!authorizationHeader) {
@@ -33,24 +33,10 @@ export function authMiddleware(req, res, next) {
     );
   }
 
+  let payload;
+
   try {
-    const payload = verifyAccessToken(token);
-
-    const user = findUserById(payload.sub);
-
-    if (!user) {
-      return next(
-        new AppError(
-          "Authenticated user was not found",
-          401,
-          "AUTH_USER_NOT_FOUND"
-        )
-      );
-    }
-
-    req.user = user;
-
-    return next();
+    payload = verifyAccessToken(token);
   } catch (error) {
     return next(
       new AppError(
@@ -60,4 +46,20 @@ export function authMiddleware(req, res, next) {
       )
     );
   }
+
+  const user = await findUserById(payload.sub);
+
+  if (!user) {
+    return next(
+      new AppError(
+        "Authenticated user was not found",
+        401,
+        "AUTH_USER_NOT_FOUND"
+      )
+    );
+  }
+
+  req.user = user;
+
+  return next();
 }

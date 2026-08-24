@@ -11,18 +11,18 @@ import {
   toPublicUsers
 } from "../serializers/user.serializer.js";
 
-export function getUsers(req, res) {
-  const users = getAllUsers();
+export async function getUsers(req, res) {
+  const users = await getAllUsers();
 
   return sendSuccess(res, {
     data: toPublicUsers(users)
   });
 }
 
-export function getUserById(req, res, next) {
+export async function getUserById(req, res, next) {
   const { id } = req.params;
 
-  const user = findUserById(id);
+  const user = await findUserById(id);
 
   if (!user) {
     return next(

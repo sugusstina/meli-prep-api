@@ -16,7 +16,7 @@ export async function registerUser({
   email,
   password
 }) {
-  const existingUser = findUserByEmail(email);
+  const existingUser = await findUserByEmail(email);
 
   if (existingUser) {
     return {
@@ -33,7 +33,7 @@ export async function registerUser({
     env.BCRYPT_SALT_ROUNDS
   );
 
-  const newUser = createUser({
+  const newUser = await createUser({
     name,
     email,
     passwordHash,
@@ -53,7 +53,7 @@ export async function loginUser({
   email,
   password
 }) {
-  const user = findUserByEmail(email);
+  const user = await findUserByEmail(email);
 
   if (!user) {
     return {
