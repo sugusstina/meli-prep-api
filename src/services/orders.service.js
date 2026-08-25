@@ -1,17 +1,36 @@
 import { orders } from "../data/orders.js";
 import { findUserById } from "./users.service.js";
 import { findProductById } from "./products.service.js";
+import { prisma } from "../db/prisma.js";
 
-export function getAllOrders() {
-  return orders;
+export async function getAllOrders() {
+  return prisma.order.findMany({
+    include: {
+      items: true
+    }
+  });
 }
 
-export function findOrderById(id) {
-  return orders.find((order) => order.id === id);
+export async function findOrderById(id) {
+  return prisma.order.findUnique({
+    where: {
+      id
+    },
+    include: {
+      items: true
+    }
+  });
 }
 
-export function getOrdersByUserId(userId) {
-  return orders.filter((order) => order.userId === userId);
+export async function getOrdersByUserId(userId) {
+  return prisma.order.findMany({
+    where: {
+      userId
+    },
+    include: {
+      items: true
+    }
+  });
 }
 
 export function createOrder({ userId, productIds }) {

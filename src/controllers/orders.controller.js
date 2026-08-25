@@ -13,26 +13,32 @@ import {
   toPublicOrders
 } from "../serializers/order.serializer.js";
 
-export function getOrders(req, res) {
-  const orders = getAllOrders();
+export async function getOrders(req, res) {
+  const orders = await getAllOrders();
 
   return sendSuccess(res, {
     data: toPublicOrders(orders)
   });
 }
 
-export function getMyOrders(req, res) {
-  const orders = getOrdersByUserId(req.user.id);
+export async function getMyOrders(req, res) {
+  const orders = await getOrdersByUserId(
+    req.user.id
+  );
 
   return sendSuccess(res, {
     data: toPublicOrders(orders)
   });
 }
 
-export function getOrderById(req, res, next) {
+export async function getOrderById(
+  req,
+  res,
+  next
+) {
   const { id } = req.params;
 
-  const order = findOrderById(id);
+  const order = await findOrderById(id);
 
   if (!order) {
     return next(

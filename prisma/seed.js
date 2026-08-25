@@ -83,6 +83,63 @@ async function main() {
     });
   }
 
+  await prisma.order.upsert({
+    where: {
+      id: "order-seed-1"
+    },
+
+    update: {
+      userId: "user-customer-1",
+      status: "pending",
+      total: 180
+    },
+
+    create: {
+      id: "order-seed-1",
+      userId: "user-customer-1",
+      status: "pending",
+      total: 180
+    }
+  });
+
+  await prisma.orderItem.upsert({
+    where: {
+      id: "order-item-seed-1"
+    },
+
+    update: {
+      orderId: "order-seed-1",
+      productId: "product-1",
+      price: 120
+    },
+
+    create: {
+      id: "order-item-seed-1",
+      orderId: "order-seed-1",
+      productId: "product-1",
+      price: 120
+    }
+  });
+
+  await prisma.orderItem.upsert({
+    where: {
+      id: "order-item-seed-2"
+    },
+
+    update: {
+      orderId: "order-seed-1",
+      productId: "product-2",
+      price: 60
+    },
+
+    create: {
+      id: "order-item-seed-2",
+      orderId: "order-seed-1",
+      productId: "product-2",
+      price: 60
+    }
+  });
+
   console.log(`📦 ${products.length} products ready`);
   console.log("✅ Database seeded successfully");
 }
