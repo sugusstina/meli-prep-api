@@ -68,10 +68,10 @@ export async function getOrderById(
   });
 }
 
-export function addOrder(req, res, next) {
+export async function addOrder(req, res, next) {
   const { productIds } = req.validatedBody;
 
-  const result = createOrder({
+  const result = await createOrder({
     userId: req.user.id,
     productIds
   });
