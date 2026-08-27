@@ -50,7 +50,7 @@ export async function createTestAdminUser(
     env.BCRYPT_SALT_ROUNDS
   );
 
-  createUser({
+  await createUser({
     name,
     email,
     passwordHash,
@@ -70,6 +70,7 @@ export async function createTestAdminUser(
     email,
     password,
     user: loginResponse.body.data?.user,
-    accessToken: loginResponse.body.data?.accessToken
+    accessToken:
+      loginResponse.body.data?.accessToken
   };
 }
