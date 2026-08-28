@@ -70,11 +70,13 @@ Controllers handle HTTP concerns:
 
 Services handle business logic and data operations.
 
-### Data
+### Data persistence
 
-For now, data is stored in in-memory arrays.
+The API uses Prisma ORM with SQLite for persistent data storage.
 
-This means changes are lost when the server restarts.
+Users, products, orders and order items are persisted in SQLite.
+
+Integration tests use a separate SQLite database to keep test data isolated from development data.
 
 ## Available endpoints
 
@@ -161,7 +163,6 @@ See [`docs/api-contract.md`](docs/api-contract.md).
 - Products CRUD
 - Users list
 - Orders creation
-- In-memory data
 - Centralized error handling
 - Consistent JSON response format
 - Product request validation with Zod
@@ -200,6 +201,10 @@ See [`docs/api-contract.md`](docs/api-contract.md).
 - Automated order ownership tests
 - Prisma ORM configured with SQLite
 - Initial database schema for users, products, orders and order items
+- Persistent data with Prisma and SQLite
+- Relational Order and OrderItem models
+- Separate SQLite database for integration tests
+- Isolated database fixtures for deterministic tests
 
 ## Next improvements
 
@@ -271,15 +276,6 @@ This project currently includes basic security-focused practices:
 - Error responses include request IDs for debugging
 - Authorization and Cookie headers are redacted from logs
 - Stack traces are not intended to be exposed in production
-
-Current limitations:
-
-- No authentication yet
-- No authorization yet
-- No database yet
-- No automated tests yet
-- No rate limiting yet
-- No security headers yet
 
 ### Auth
 

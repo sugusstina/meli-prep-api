@@ -1,4 +1,3 @@
-import { orders } from "../data/orders.js";
 import { prisma } from "../db/prisma.js";
 
 export async function getAllOrders() {
