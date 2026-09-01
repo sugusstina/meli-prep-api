@@ -2,7 +2,8 @@ import {
   getAllOrders,
   getOrdersByUserId,
   findOrderById,
-  createOrder
+  createOrder,
+  cancelOrderById
 } from "../services/orders.service.js";
 
 import { AppError } from "../errors/AppError.js";
@@ -120,4 +121,74 @@ export async function addOrder(req, res, next) {
     statusCode: 201,
     data: toPublicOrder(result.order)
   });
-} 
+}
+
+export async function cancelOrder(
+  req,
+  res,
+  next
+) {
+  const { id } = req.params;
+
+  const existingOrder =
+    await findOrderById(id);
+
+  if (!existingOrder) {
+    return next(
+      new AppError(
+        "Order not found",
+        404,
+        "ORDER_NOT_FOUND"
+      )
+    );
+  }
+
+  const isAdmin =
+    req.user.role === "admin";
+
+  const isOwner =
+    existingOrder.userId === req.user.id;
+
+  if (!isAdmin && !isOwner) {
+    return next(
+      new AppError(
+        "You do not have permission to cancel this order",
+        403,
+        "FORBIDDEN"
+      )
+    );
+  }
+
+  const result =
+    await cancelOrderById(id);
+
+  if (
+    result.error?.code ===
+    "ORDER_CANNOT_BE_CANCELLED"
+  ) {
+    return next(
+      new AppError(
+        "Order cannot be cancelled",
+        409,
+        "ORDER_CANNOT_BE_CANCELLED"
+      )
+    );
+  }
+
+  if (
+    result.error?.code ===
+    "ORDER_NOT_FOUND"
+  ) {
+    return next(
+      new AppError(
+        "Order not found",
+        404,
+        "ORDER_NOT_FOUND"
+      )
+    );
+  }
+
+  return sendSuccess(res, {
+    data: toPublicOrder(result.order)
+  });
+}

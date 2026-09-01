@@ -354,4 +354,141 @@ describe("Order authorization and ownership", () => {
 
     expect(product.stock).toBe(1);
   });
+
+  test("PATCH /api/orders/:id/cancel restores product stock", async () => {
+    const { accessToken } =
+      await registerTestUser(app);
+
+    const productBefore =
+      await prisma.product.findUnique({
+        where: {
+          id: "prod_1"
+        }
+      });
+
+    const order = await createOrderAsUser(
+      app,
+      accessToken,
+      ["prod_1", "prod_1"]
+    );
+
+    const productAfterOrder =
+      await prisma.product.findUnique({
+        where: {
+          id: "prod_1"
+        }
+      });
+
+    expect(productAfterOrder.stock).toBe(
+      productBefore.stock - 2
+    );
+
+    const response = await request(app)
+      .patch(
+        `/api/orders/${order.id}/cancel`
+      )
+      .set(
+        "Authorization",
+        `Bearer ${accessToken}`
+      )
+      .expect(200);
+
+    expect(response.body.data.status).toBe(
+      "cancelled"
+    );
+
+    const productAfterCancellation =
+      await prisma.product.findUnique({
+        where: {
+          id: "prod_1"
+        }
+      });
+
+    expect(
+      productAfterCancellation.stock
+    ).toBe(productBefore.stock);
+  });
+  test("PATCH /api/orders/:id/cancel does not restore stock twice", async () => {
+    const { accessToken } =
+      await registerTestUser(app);
+  
+    const order = await createOrderAsUser(
+      app,
+      accessToken,
+      ["prod_1"]
+    );
+  
+    await request(app)
+      .patch(
+        `/api/orders/${order.id}/cancel`
+      )
+      .set(
+        "Authorization",
+        `Bearer ${accessToken}`
+      )
+      .expect(200);
+  
+    const productAfterFirstCancellation =
+      await prisma.product.findUnique({
+        where: {
+          id: "prod_1"
+        }
+      });
+  
+    const response = await request(app)
+      .patch(
+        `/api/orders/${order.id}/cancel`
+      )
+      .set(
+        "Authorization",
+        `Bearer ${accessToken}`
+      )
+      .expect(409);
+  
+    expect(response.body.error.code).toBe(
+      "ORDER_CANNOT_BE_CANCELLED"
+    );
+  
+    const productAfterSecondCancellation =
+      await prisma.product.findUnique({
+        where: {
+          id: "prod_1"
+        }
+      });
+  
+    expect(
+      productAfterSecondCancellation.stock
+    ).toBe(
+      productAfterFirstCancellation.stock
+    );
+  });
+  test("PATCH /api/orders/:id/cancel returns 403 for another customer", async () => {
+    const {
+      accessToken: ownerToken
+    } = await registerTestUser(app);
+  
+    const {
+      accessToken: otherToken
+    } = await registerTestUser(app);
+  
+    const order = await createOrderAsUser(
+      app,
+      ownerToken,
+      ["prod_1"]
+    );
+  
+    const response = await request(app)
+      .patch(
+        `/api/orders/${order.id}/cancel`
+      )
+      .set(
+        "Authorization",
+        `Bearer ${otherToken}`
+      )
+      .expect(403);
+  
+    expect(response.body.error.code).toBe(
+      "FORBIDDEN"
+    );
+  });
 });

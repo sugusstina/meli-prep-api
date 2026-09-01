@@ -4,7 +4,8 @@ import {
   getOrders,
   getMyOrders,
   getOrderById,
-  addOrder
+  addOrder,
+  cancelOrder
 } from "../controllers/orders.controller.js";
 
 import { validateBody } from "../middlewares/validate.middleware.js";
@@ -39,6 +40,12 @@ router.post(
   authMiddleware,
   validateBody(createOrderSchema),
   addOrder
+);
+
+router.patch(
+  "/:id/cancel",
+  authMiddleware,
+  cancelOrder
 );
 
 export default router;

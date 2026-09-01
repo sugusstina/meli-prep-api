@@ -188,3 +188,100 @@ export async function createOrder({
     };
   });
 }
+
+export async function cancelOrderById(id) {
+  return prisma.$transaction(async (tx) => {
+    const order = await tx.order.findUnique({
+      where: {
+        id
+      },
+      include: {
+        items: true
+      }
+    });
+
+    if (!order) {
+      return {
+        order: null,
+        error: {
+          code: "ORDER_NOT_FOUND"
+        }
+      };
+    }
+
+    if (order.status !== "pending") {
+      return {
+        order: null,
+        error: {
+          code: "ORDER_CANNOT_BE_CANCELLED",
+          currentStatus: order.status
+        }
+      };
+    }
+
+    const quantityByProductId = new Map();
+
+    for (const item of order.items) {
+      const currentQuantity =
+        quantityByProductId.get(
+          item.productId
+        ) ?? 0;
+
+      quantityByProductId.set(
+        item.productId,
+        currentQuantity + 1
+      );
+    }
+
+    const updateResult =
+      await tx.order.updateMany({
+        where: {
+          id,
+          status: "pending"
+        },
+        data: {
+          status: "cancelled"
+        }
+      });
+
+    if (updateResult.count === 0) {
+      return {
+        order: null,
+        error: {
+          code: "ORDER_CANNOT_BE_CANCELLED"
+        }
+      };
+    }
+
+    for (
+      const [productId, quantity]
+      of quantityByProductId
+    ) {
+      await tx.product.update({
+        where: {
+          id: productId
+        },
+        data: {
+          stock: {
+            increment: quantity
+          }
+        }
+      });
+    }
+
+    const cancelledOrder =
+      await tx.order.findUnique({
+        where: {
+          id
+        },
+        include: {
+          items: true
+        }
+      });
+
+    return {
+      order: cancelledOrder,
+      error: null
+    };
+  });
+}
