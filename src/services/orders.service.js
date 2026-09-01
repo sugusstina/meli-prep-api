@@ -34,94 +34,157 @@ export async function createOrder({
   userId,
   productIds
 }) {
-  const user = await prisma.user.findUnique({
-    where: {
-      id: userId
-    }
-  });
+  const requestedQuantityByProductId =
+    new Map();
 
-  if (!user) {
-    return {
-      order: null,
-      error: {
-        code: "USER_NOT_FOUND"
-      }
-    };
+  for (const productId of productIds) {
+    const currentQuantity =
+      requestedQuantityByProductId.get(
+        productId
+      ) ?? 0;
+
+    requestedQuantityByProductId.set(
+      productId,
+      currentQuantity + 1
+    );
   }
 
-  const products = await prisma.product.findMany({
-    where: {
-      id: {
-        in: productIds
+  return prisma.$transaction(async (tx) => {
+    const user = await tx.user.findUnique({
+      where: {
+        id: userId
       }
+    });
+
+    if (!user) {
+      return {
+        order: null,
+        error: {
+          code: "USER_NOT_FOUND"
+        }
+      };
     }
-  });
 
-  const productsById = new Map(
-    products.map((product) => [
-      product.id,
-      product
-    ])
-  );
+    const products =
+      await tx.product.findMany({
+        where: {
+          id: {
+            in: productIds
+          }
+        }
+      });
 
-  const missingProductIds = [
-    ...new Set(
-      productIds.filter(
-        (productId) =>
-          !productsById.has(productId)
-      )
-    )
-  ];
+    const productsById = new Map(
+      products.map((product) => [
+        product.id,
+        product
+      ])
+    );
 
-  if (missingProductIds.length > 0) {
-    return {
-      order: null,
-      error: {
-        code: "PRODUCTS_NOT_FOUND",
-        missingProductIds
-      }
-    };
-  }
-
-  const selectedProducts = productIds.map(
-    (productId) =>
-      productsById.get(productId)
-  );
-
-  const total = selectedProducts.reduce(
-    (currentTotal, product) => {
-      return currentTotal + product.price;
-    },
-    0
-  );
-
-  const timestamp = Date.now();
-
-  const newOrder = await prisma.order.create({
-    data: {
-      id: `order_${timestamp}`,
-      userId,
-      status: "pending",
-      total,
-
-      items: {
-        create: selectedProducts.map(
-          (product, index) => ({
-            id: `order_item_${timestamp}_${index}`,
-            productId: product.id,
-            price: product.price
-          })
+    const missingProductIds = [
+      ...new Set(
+        productIds.filter(
+          (productId) =>
+            !productsById.has(productId)
         )
-      }
-    },
+      )
+    ];
 
-    include: {
-      items: true
+    if (missingProductIds.length > 0) {
+      return {
+        order: null,
+        error: {
+          code: "PRODUCTS_NOT_FOUND",
+          missingProductIds
+        }
+      };
     }
-  });
 
-  return {
-    order: newOrder,
-    error: null
-  };
+    const insufficientStock = products
+      .map((product) => {
+        const requested =
+          requestedQuantityByProductId.get(
+            product.id
+          );
+
+        return {
+          productId: product.id,
+          requested,
+          available: product.stock
+        };
+      })
+      .filter(
+        ({ requested, available }) =>
+          requested > available
+      );
+
+    if (insufficientStock.length > 0) {
+      return {
+        order: null,
+        error: {
+          code: "INSUFFICIENT_STOCK",
+          products: insufficientStock
+        }
+      };
+    }
+
+    const selectedProducts =
+      productIds.map(
+        (productId) =>
+          productsById.get(productId)
+      );
+
+    const total = selectedProducts.reduce(
+      (currentTotal, product) => {
+        return currentTotal + product.price;
+      },
+      0
+    );
+
+    for (
+      const [productId, quantity]
+      of requestedQuantityByProductId
+    ) {
+      await tx.product.update({
+        where: {
+          id: productId
+        },
+        data: {
+          stock: {
+            decrement: quantity
+          }
+        }
+      });
+    }
+
+    const timestamp = Date.now();
+
+    const newOrder = await tx.order.create({
+      data: {
+        id: `order_${timestamp}`,
+        userId,
+        status: "pending",
+        total,
+
+        items: {
+          create: selectedProducts.map(
+            (product, index) => ({
+              id: `order_item_${timestamp}_${index}`,
+              productId: product.id,
+              price: product.price
+            })
+          )
+        }
+      },
+
+      include: {
+        items: true
+      }
+    });
+
+    return {
+      order: newOrder,
+      error: null
+    };
+  });
 }

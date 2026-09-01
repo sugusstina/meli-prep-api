@@ -1,5 +1,6 @@
 import request from "supertest";
 import { describe, expect, test } from "vitest";
+import { prisma } from "../../src/db/prisma.js";
 
 import app from "../../src/app.js";
 
@@ -278,5 +279,79 @@ describe("Order authorization and ownership", () => {
     expect(response.body.error.code).toBe("ORDER_NOT_FOUND");
     expect(response.body.error.message).toBe("Order not found");
     expect(response.body.error.requestId).toBeDefined();
+  });
+
+  test("POST /api/orders decrements product stock", async () => {
+    const { accessToken } =
+      await registerTestUser(app);
+
+    const productBefore = await prisma.product.findUnique({
+      where: {
+        id: "prod_1"
+      }
+    });
+
+    await request(app)
+      .post("/api/orders")
+      .set(
+        "Authorization",
+        `Bearer ${accessToken}`
+      )
+      .send({
+        productIds: [
+          "prod_1",
+          "prod_1"
+        ]
+      })
+      .expect(201);
+
+    const productAfter = await prisma.product.findUnique({
+      where: {
+        id: "prod_1"
+      }
+    });
+
+    expect(productAfter.stock).toBe(
+      productBefore.stock - 2
+    );
+  });
+  test("POST /api/orders returns 409 when stock is insufficient", async () => {
+    const { accessToken } =
+      await registerTestUser(app);
+
+    await prisma.product.update({
+      where: {
+        id: "prod_1"
+      },
+      data: {
+        stock: 1
+      }
+    });
+
+    const response = await request(app)
+      .post("/api/orders")
+      .set(
+        "Authorization",
+        `Bearer ${accessToken}`
+      )
+      .send({
+        productIds: [
+          "prod_1",
+          "prod_1"
+        ]
+      })
+      .expect(409);
+
+    expect(response.body.error.code).toBe(
+      "INSUFFICIENT_STOCK"
+    );
+
+    const product = await prisma.product.findUnique({
+      where: {
+        id: "prod_1"
+      }
+    });
+
+    expect(product.stock).toBe(1);
   });
 });

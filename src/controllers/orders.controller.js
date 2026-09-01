@@ -100,8 +100,24 @@ export async function addOrder(req, res, next) {
     );
   }
 
+  if (
+    result.error?.code ===
+    "INSUFFICIENT_STOCK"
+  ) {
+    return next(
+      new AppError(
+        "Insufficient stock for one or more products",
+        409,
+        "INSUFFICIENT_STOCK",
+        {
+          products: result.error.products
+        }
+      )
+    );
+  }
+
   return sendSuccess(res, {
     statusCode: 201,
     data: toPublicOrder(result.order)
   });
-}
+} 
