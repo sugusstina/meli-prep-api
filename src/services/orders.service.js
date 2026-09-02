@@ -1,4 +1,8 @@
 import { prisma } from "../db/prisma.js";
+import {
+  ORDER_STATUS,
+  canTransitionOrderStatus
+} from "../domain/order-status.js";
 
 export async function getAllOrders() {
   return prisma.order.findMany({
@@ -163,7 +167,7 @@ export async function createOrder({
       data: {
         id: `order_${timestamp}`,
         userId,
-        status: "pending",
+        status: ORDER_STATUS.PENDING,
         total,
 
         items: {
@@ -209,7 +213,12 @@ export async function cancelOrderById(id) {
       };
     }
 
-    if (order.status !== "pending") {
+    if (
+      !canTransitionOrderStatus(
+        order.status,
+        ORDER_STATUS.CANCELLED
+      )
+    ) {
       return {
         order: null,
         error: {
@@ -237,10 +246,10 @@ export async function cancelOrderById(id) {
       await tx.order.updateMany({
         where: {
           id,
-          status: "pending"
+          status: ORDER_STATUS.PENDING
         },
         data: {
-          status: "cancelled"
+          status: ORDER_STATUS.CANCELLED
         }
       });
 
@@ -281,6 +290,84 @@ export async function cancelOrderById(id) {
 
     return {
       order: cancelledOrder,
+      error: null
+    };
+  });
+}
+
+export async function updateOrderStatus(
+  id,
+  nextStatus
+) {
+  return prisma.$transaction(async (tx) => {
+    const order = await tx.order.findUnique({
+      where: {
+        id
+      },
+      include: {
+        items: true
+      }
+    });
+
+    if (!order) {
+      return {
+        order: null,
+        error: {
+          code: "ORDER_NOT_FOUND"
+        }
+      };
+    }
+
+    if (
+      !canTransitionOrderStatus(
+        order.status,
+        nextStatus
+      )
+    ) {
+      return {
+        order: null,
+        error: {
+          code:
+            "INVALID_ORDER_STATUS_TRANSITION",
+          currentStatus: order.status,
+          requestedStatus: nextStatus
+        }
+      };
+    }
+
+    const updateResult =
+      await tx.order.updateMany({
+        where: {
+          id,
+          status: order.status
+        },
+        data: {
+          status: nextStatus
+        }
+      });
+
+    if (updateResult.count === 0) {
+      return {
+        order: null,
+        error: {
+          code:
+            "INVALID_ORDER_STATUS_TRANSITION"
+        }
+      };
+    }
+
+    const updatedOrder =
+      await tx.order.findUnique({
+        where: {
+          id
+        },
+        include: {
+          items: true
+        }
+      });
+
+    return {
+      order: updatedOrder,
       error: null
     };
   });

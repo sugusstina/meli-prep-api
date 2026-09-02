@@ -5,8 +5,14 @@ import {
   getMyOrders,
   getOrderById,
   addOrder,
-  cancelOrder
+  cancelOrder,
+  changeOrderStatus
 } from "../controllers/orders.controller.js";
+
+import {
+  createOrderSchema,
+  updateOrderStatusSchema
+} from "../schemas/order.schema.js";
 
 import { validateBody } from "../middlewares/validate.middleware.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
@@ -46,6 +52,14 @@ router.patch(
   "/:id/cancel",
   authMiddleware,
   cancelOrder
+);
+
+router.patch(
+  "/:id/status",
+  authMiddleware,
+  requireRole("admin"),
+  validateBody(updateOrderStatusSchema),
+  changeOrderStatus
 );
 
 export default router;

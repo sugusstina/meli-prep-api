@@ -3,7 +3,8 @@ import {
   getOrdersByUserId,
   findOrderById,
   createOrder,
-  cancelOrderById
+  cancelOrderById,
+  updateOrderStatus
 } from "../services/orders.service.js";
 
 import { AppError } from "../errors/AppError.js";
@@ -184,6 +185,58 @@ export async function cancelOrder(
         "Order not found",
         404,
         "ORDER_NOT_FOUND"
+      )
+    );
+  }
+
+  return sendSuccess(res, {
+    data: toPublicOrder(result.order)
+  });
+}
+
+export async function changeOrderStatus(
+  req,
+  res,
+  next
+) {
+  const { id } = req.params;
+  const { status } = req.validatedBody;
+
+  const result =
+    await updateOrderStatus(
+      id,
+      status
+    );
+
+  if (
+    result.error?.code ===
+    "ORDER_NOT_FOUND"
+  ) {
+    return next(
+      new AppError(
+        "Order not found",
+        404,
+        "ORDER_NOT_FOUND"
+      )
+    );
+  }
+
+  if (
+    result.error?.code ===
+    "INVALID_ORDER_STATUS_TRANSITION"
+  ) {
+    return next(
+      new AppError(
+        "Invalid order status transition",
+        409,
+        "INVALID_ORDER_STATUS_TRANSITION",
+        {
+          currentStatus:
+            result.error.currentStatus,
+
+          requestedStatus:
+            result.error.requestedStatus
+        }
       )
     );
   }

@@ -411,13 +411,13 @@ describe("Order authorization and ownership", () => {
   test("PATCH /api/orders/:id/cancel does not restore stock twice", async () => {
     const { accessToken } =
       await registerTestUser(app);
-  
+
     const order = await createOrderAsUser(
       app,
       accessToken,
       ["prod_1"]
     );
-  
+
     await request(app)
       .patch(
         `/api/orders/${order.id}/cancel`
@@ -427,14 +427,14 @@ describe("Order authorization and ownership", () => {
         `Bearer ${accessToken}`
       )
       .expect(200);
-  
+
     const productAfterFirstCancellation =
       await prisma.product.findUnique({
         where: {
           id: "prod_1"
         }
       });
-  
+
     const response = await request(app)
       .patch(
         `/api/orders/${order.id}/cancel`
@@ -444,18 +444,18 @@ describe("Order authorization and ownership", () => {
         `Bearer ${accessToken}`
       )
       .expect(409);
-  
+
     expect(response.body.error.code).toBe(
       "ORDER_CANNOT_BE_CANCELLED"
     );
-  
+
     const productAfterSecondCancellation =
       await prisma.product.findUnique({
         where: {
           id: "prod_1"
         }
       });
-  
+
     expect(
       productAfterSecondCancellation.stock
     ).toBe(
@@ -466,17 +466,17 @@ describe("Order authorization and ownership", () => {
     const {
       accessToken: ownerToken
     } = await registerTestUser(app);
-  
+
     const {
       accessToken: otherToken
     } = await registerTestUser(app);
-  
+
     const order = await createOrderAsUser(
       app,
       ownerToken,
       ["prod_1"]
     );
-  
+
     const response = await request(app)
       .patch(
         `/api/orders/${order.id}/cancel`
@@ -486,9 +486,150 @@ describe("Order authorization and ownership", () => {
         `Bearer ${otherToken}`
       )
       .expect(403);
-  
+
     expect(response.body.error.code).toBe(
       "FORBIDDEN"
     );
   });
+});
+
+test("PATCH /api/orders/:id/status moves pending order to processing", async () => {
+  const {
+    accessToken: customerToken
+  } = await registerTestUser(app);
+
+  const {
+    accessToken: adminToken
+  } = await createTestAdminUser(app);
+
+  const order = await createOrderAsUser(
+    app,
+    customerToken,
+    ["prod_1"]
+  );
+
+  const response = await request(app)
+    .patch(
+      `/api/orders/${order.id}/status`
+    )
+    .set(
+      "Authorization",
+      `Bearer ${adminToken}`
+    )
+    .send({
+      status: "processing"
+    })
+    .expect(200);
+
+  expect(response.body.data.status).toBe(
+    "processing"
+  );
+});
+
+test("PATCH /api/orders/:id/status moves processing order to completed", async () => {
+  const {
+    accessToken: customerToken
+  } = await registerTestUser(app);
+
+  const {
+    accessToken: adminToken
+  } = await createTestAdminUser(app);
+
+  const order = await createOrderAsUser(
+    app,
+    customerToken,
+    ["prod_1"]
+  );
+
+  await request(app)
+    .patch(
+      `/api/orders/${order.id}/status`
+    )
+    .set(
+      "Authorization",
+      `Bearer ${adminToken}`
+    )
+    .send({
+      status: "processing"
+    })
+    .expect(200);
+
+  const response = await request(app)
+    .patch(
+      `/api/orders/${order.id}/status`
+    )
+    .set(
+      "Authorization",
+      `Bearer ${adminToken}`
+    )
+    .send({
+      status: "completed"
+    })
+    .expect(200);
+
+  expect(response.body.data.status).toBe(
+    "completed"
+  );
+});
+
+test("PATCH /api/orders/:id/status rejects invalid status transition", async () => {
+  const {
+    accessToken: customerToken
+  } = await registerTestUser(app);
+
+  const {
+    accessToken: adminToken
+  } = await createTestAdminUser(app);
+
+  const order = await createOrderAsUser(
+    app,
+    customerToken,
+    ["prod_1"]
+  );
+
+  const response = await request(app)
+    .patch(
+      `/api/orders/${order.id}/status`
+    )
+    .set(
+      "Authorization",
+      `Bearer ${adminToken}`
+    )
+    .send({
+      status: "completed"
+    })
+    .expect(409);
+
+  expect(response.body.error.code).toBe(
+    "INVALID_ORDER_STATUS_TRANSITION"
+  );
+});
+
+test("PATCH /api/orders/:id/status returns 403 for customer", async () => {
+  const {
+    accessToken
+  } = await registerTestUser(app);
+
+  const order = await createOrderAsUser(
+    app,
+    accessToken,
+    ["prod_1"]
+  );
+
+  const response = await request(app)
+    .patch(
+      `/api/orders/${order.id}/status`
+    )
+    .set(
+      "Authorization",
+      `Bearer ${accessToken}`
+    )
+    .send({
+      status: "processing"
+    })
+    .expect(403);
+
+  expect(response.body.error.code).toBe(
+    "FORBIDDEN"
+  );
 });

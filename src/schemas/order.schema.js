@@ -12,3 +12,12 @@ export const createOrderSchema = z
       .min(1, "At least one product is required")
   })
   .strict();
+
+export const updateOrderStatusSchema = z
+  .object({
+    status: z.enum([
+      "processing",
+      "completed"
+    ])
+  })
+  .strict();
