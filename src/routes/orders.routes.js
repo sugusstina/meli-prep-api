@@ -18,8 +18,6 @@ import { validateBody } from "../middlewares/validate.middleware.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { requireRole } from "../middlewares/role.middleware.js";
 
-import { createOrderSchema } from "../schemas/order.schema.js";
-
 const router = Router();
 
 router.get(

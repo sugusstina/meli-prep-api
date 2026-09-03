@@ -1,8 +1,24 @@
 import { prisma } from "../db/prisma.js";
+
 import {
   ORDER_STATUS,
   canTransitionOrderStatus
 } from "../domain/order-status.js";
+
+class StockConflictError extends Error {
+  constructor({
+    productId,
+    requested
+  }) {
+    super(
+      "Stock changed during order creation"
+    );
+
+    this.name = "StockConflictError";
+    this.productId = productId;
+    this.requested = requested;
+  }
+}
 
 export async function getAllOrders() {
   return prisma.order.findMany({
@@ -53,144 +69,245 @@ export async function createOrder({
     );
   }
 
-  return prisma.$transaction(async (tx) => {
-    const user = await tx.user.findUnique({
-      where: {
-        id: userId
-      }
-    });
+  try {
+    return await prisma.$transaction(
+      async (tx) => {
+        const user =
+          await tx.user.findUnique({
+            where: {
+              id: userId
+            }
+          });
 
-    if (!user) {
-      return {
-        order: null,
-        error: {
-          code: "USER_NOT_FOUND"
+        if (!user) {
+          return {
+            order: null,
+            error: {
+              code: "USER_NOT_FOUND"
+            }
+          };
         }
-      };
-    }
 
-    const products =
-      await tx.product.findMany({
-        where: {
-          id: {
-            in: productIds
-          }
+        const products =
+          await tx.product.findMany({
+            where: {
+              id: {
+                in: productIds
+              }
+            }
+          });
+
+        const productsById = new Map(
+          products.map((product) => [
+            product.id,
+            product
+          ])
+        );
+
+        const missingProductIds = [
+          ...new Set(
+            productIds.filter(
+              (productId) =>
+                !productsById.has(
+                  productId
+                )
+            )
+          )
+        ];
+
+        if (
+          missingProductIds.length > 0
+        ) {
+          return {
+            order: null,
+            error: {
+              code:
+                "PRODUCTS_NOT_FOUND",
+              missingProductIds
+            }
+          };
         }
-      });
 
-    const productsById = new Map(
-      products.map((product) => [
-        product.id,
-        product
-      ])
-    );
+        const insufficientStock =
+          products
+            .map((product) => {
+              const requested =
+                requestedQuantityByProductId.get(
+                  product.id
+                );
 
-    const missingProductIds = [
-      ...new Set(
-        productIds.filter(
-          (productId) =>
-            !productsById.has(productId)
-        )
-      )
-    ];
+              return {
+                productId: product.id,
+                requested,
+                available:
+                  product.stock
+              };
+            })
+            .filter(
+              ({
+                requested,
+                available
+              }) =>
+                requested > available
+            );
 
-    if (missingProductIds.length > 0) {
-      return {
-        order: null,
-        error: {
-          code: "PRODUCTS_NOT_FOUND",
-          missingProductIds
+        if (
+          insufficientStock.length > 0
+        ) {
+          return {
+            order: null,
+            error: {
+              code:
+                "INSUFFICIENT_STOCK",
+              products:
+                insufficientStock
+            }
+          };
         }
-      };
-    }
 
-    const insufficientStock = products
-      .map((product) => {
-        const requested =
-          requestedQuantityByProductId.get(
-            product.id
+        const selectedProducts =
+          productIds.map(
+            (productId) =>
+              productsById.get(
+                productId
+              )
           );
 
-        return {
-          productId: product.id,
-          requested,
-          available: product.stock
-        };
-      })
-      .filter(
-        ({ requested, available }) =>
-          requested > available
-      );
+        const total =
+          selectedProducts.reduce(
+            (
+              currentTotal,
+              product
+            ) => {
+              return (
+                currentTotal +
+                product.price
+              );
+            },
+            0
+          );
 
-    if (insufficientStock.length > 0) {
+        for (
+          const [
+            productId,
+            quantity
+          ] of requestedQuantityByProductId
+        ) {
+          const stockUpdateResult =
+            await tx.product.updateMany({
+              where: {
+                id: productId,
+                stock: {
+                  gte: quantity
+                }
+              },
+              data: {
+                stock: {
+                  decrement: quantity
+                }
+              }
+            });
+
+          if (
+            stockUpdateResult.count === 0
+          ) {
+            throw new StockConflictError(
+              {
+                productId,
+                requested:
+                  quantity
+              }
+            );
+          }
+        }
+
+        const timestamp = Date.now();
+
+        const newOrder =
+          await tx.order.create({
+            data: {
+              id: `order_${timestamp}`,
+              userId,
+              status:
+                ORDER_STATUS.PENDING,
+              total,
+
+              items: {
+                create:
+                  selectedProducts.map(
+                    (
+                      product,
+                      index
+                    ) => ({
+                      id: `order_item_${timestamp}_${index}`,
+                      productId:
+                        product.id,
+                      price:
+                        product.price
+                    })
+                  )
+              }
+            },
+
+            include: {
+              items: true
+            }
+          });
+
+        return {
+          order: newOrder,
+          error: null
+        };
+      }
+    );
+  } catch (error) {
+    if (
+      error instanceof
+      StockConflictError
+    ) {
+      const currentProduct =
+        await prisma.product.findUnique(
+          {
+            where: {
+              id: error.productId
+            }
+          }
+        );
+
+      if (!currentProduct) {
+        return {
+          order: null,
+          error: {
+            code:
+              "PRODUCTS_NOT_FOUND",
+            missingProductIds: [
+              error.productId
+            ]
+          }
+        };
+      }
+
       return {
         order: null,
         error: {
-          code: "INSUFFICIENT_STOCK",
-          products: insufficientStock
+          code:
+            "INSUFFICIENT_STOCK",
+          products: [
+            {
+              productId:
+                currentProduct.id,
+              requested:
+                error.requested,
+              available:
+                currentProduct.stock
+            }
+          ]
         }
       };
     }
 
-    const selectedProducts =
-      productIds.map(
-        (productId) =>
-          productsById.get(productId)
-      );
-
-    const total = selectedProducts.reduce(
-      (currentTotal, product) => {
-        return currentTotal + product.price;
-      },
-      0
-    );
-
-    for (
-      const [productId, quantity]
-      of requestedQuantityByProductId
-    ) {
-      await tx.product.update({
-        where: {
-          id: productId
-        },
-        data: {
-          stock: {
-            decrement: quantity
-          }
-        }
-      });
-    }
-
-    const timestamp = Date.now();
-
-    const newOrder = await tx.order.create({
-      data: {
-        id: `order_${timestamp}`,
-        userId,
-        status: ORDER_STATUS.PENDING,
-        total,
-
-        items: {
-          create: selectedProducts.map(
-            (product, index) => ({
-              id: `order_item_${timestamp}_${index}`,
-              productId: product.id,
-              price: product.price
-            })
-          )
-        }
-      },
-
-      include: {
-        items: true
-      }
-    });
-
-    return {
-      order: newOrder,
-      error: null
-    };
-  });
+    throw error;
+  }
 }
 
 export async function cancelOrderById(id) {
@@ -222,13 +339,15 @@ export async function cancelOrderById(id) {
       return {
         order: null,
         error: {
-          code: "ORDER_CANNOT_BE_CANCELLED",
+          code:
+            "ORDER_CANNOT_BE_CANCELLED",
           currentStatus: order.status
         }
       };
     }
 
-    const quantityByProductId = new Map();
+    const quantityByProductId =
+      new Map();
 
     for (const item of order.items) {
       const currentQuantity =
@@ -246,10 +365,12 @@ export async function cancelOrderById(id) {
       await tx.order.updateMany({
         where: {
           id,
-          status: ORDER_STATUS.PENDING
+          status:
+            ORDER_STATUS.PENDING
         },
         data: {
-          status: ORDER_STATUS.CANCELLED
+          status:
+            ORDER_STATUS.CANCELLED
         }
       });
 
@@ -257,14 +378,17 @@ export async function cancelOrderById(id) {
       return {
         order: null,
         error: {
-          code: "ORDER_CANNOT_BE_CANCELLED"
+          code:
+            "ORDER_CANNOT_BE_CANCELLED"
         }
       };
     }
 
     for (
-      const [productId, quantity]
-      of quantityByProductId
+      const [
+        productId,
+        quantity
+      ] of quantityByProductId
     ) {
       await tx.product.update({
         where: {
@@ -329,8 +453,10 @@ export async function updateOrderStatus(
         error: {
           code:
             "INVALID_ORDER_STATUS_TRANSITION",
-          currentStatus: order.status,
-          requestedStatus: nextStatus
+          currentStatus:
+            order.status,
+          requestedStatus:
+            nextStatus
         }
       };
     }
