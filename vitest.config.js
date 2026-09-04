@@ -10,7 +10,7 @@ export default defineConfig({
     ],
 
     include: [
-      "tests/**/*.test.js"
+      "tests/integration/**/*.test.js"
     ],
 
     fileParallelism: false

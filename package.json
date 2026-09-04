@@ -7,8 +7,9 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "test:prepare": "DATABASE_URL=file:./test.db prisma db push --skip-generate",
-    "test": "npm run test:prepare && vitest run",
-    "test:watch": "npm run test:prepare && vitest",
+    "test:unit": "vitest run --config vitest.unit.config.js",
+    "test:integration": "npm run test:prepare && vitest run --config vitest.config.js",
+    "test": "npm run test:unit && npm run test:integration",
     "start": "node src/server.js",
     "audit": "npm audit",
     "db:test": "node scripts/test-db-connection.js",
