@@ -4,13 +4,13 @@ Postman is used as the manual API client for the Meli Prep API.
 
 Automated regression testing remains handled by Vitest and Supertest.
 
+---
+
 ## Local environment
 
-Create a Postman environment named:
+Create a Postman environment named **Meli Prep Local**.
 
-`Meli Prep Local`
-
-Variables:
+### Variables
 
 - `baseUrl`
 - `customerEmail`
@@ -21,19 +21,21 @@ Variables:
 - `adminAccessToken`
 - `orderId`
 
-Local base URL:
+### Local base URL
 
-`http://localhost:3000`
+```txt
+http://localhost:3000
+```
 
-Access tokens are populated automatically by the login requests.
+Access tokens are populated automatically by login requests and folder pre-request scripts.
+
+---
 
 ## Collection
 
-Collection name:
+Collection name: **Meli Prep API**
 
-`Meli Prep API`
-
-Suggested structure:
+### Suggested structure
 
 ```txt
 Auth/
@@ -48,6 +50,7 @@ Customer/
   Get Me
   My Orders
   Create Order
+  Get Order By ID
   Cancel Order
 
 Admin/
@@ -55,130 +58,139 @@ Admin/
   Change Order Status
 ```
 
-
+---
 
 ## Authentication
 
-The Customer folder uses Bearer authentication with:
+The **Customer** folder uses Bearer authentication with:
 
-```
+```txt
 {{customerAccessToken}}
 ```
 
-The Admin folder uses Bearer authentication with:
+The **Admin** folder uses Bearer authentication with:
 
-```
+```txt
 {{adminAccessToken}}
 ```
 
 Requests inside those folders inherit authentication from their parent.
 
-## Login automation
+### Login automation
 
-Customer login stores the returned JWT in:
+Customer login stores the returned JWT in `customerAccessToken`.
 
-```
-customerAccessToken
-```
+Admin login stores the returned JWT in `adminAccessToken`.
 
-Admin login stores the returned JWT in:
+The **Customer** and **Admin** folders also use pre-request scripts to check whether their access token exists and is still valid.
 
-```
-adminAccessToken
-```
+If the token is missing or expired, Postman automatically sends a login request and stores the new access token before the protected request runs.
 
-The Create Order request stores the created order ID in:
+The JWT expiration field is used only to decide whether a fresh login is needed.
 
-```
-orderId
-```
+JWT signature verification remains the responsibility of the API.
 
-This allows authenticated requests to be executed without manually copying JWTs or order IDs.
+---
 
 ## Testing strategy
 
-Postman is intended for manual and exploratory API testing.
+Postman is intended for **manual and exploratory** API testing.
 
 Vitest and Supertest remain the source of truth for automated regression testing.
 
 Run the complete automated test suite with:
 
-```
+```bash
 npm test
 ```
 
-
+---
 
 ## Order workflow
 
-The Customer folder contains requests for the authenticated
-customer order flow:
+The **Customer** folder contains requests for the authenticated customer order flow:
 
-```txt
-Create Order
-Get Order By ID
-My Orders
-Cancel Order
-```
+- Create Order
+- Get Order By ID
+- My Orders
+- Cancel Order
 
-The Create Order request stores the returned order ID in the
-`orderId` environment variable:
+The **Create Order** request stores the returned order ID in the `orderId` environment variable.
 
-```
-const response = pm.response.json();
+Other requests can reuse it with `{{orderId}}`.
 
-pm.environment.set(
-  "orderId",
-  response.data.id
-);
-```
+### Example requests
 
-Other requests can reuse it with:
-
-```
-{{orderId}}
-```
-
-For example:
-
-```
+```http
 GET {{baseUrl}}/api/orders/{{orderId}}
 
 PATCH {{baseUrl}}/api/orders/{{orderId}}/cancel
 ```
 
-The Admin folder includes:
+### Admin requests
 
-```
+The **Admin** folder includes:
+
+```http
 GET {{baseUrl}}/api/orders
 
 PATCH {{baseUrl}}/api/orders/{{orderId}}/status
 ```
 
-Admin status updates use the adminAccessToken inherited from
-the Admin folder.
+Admin status updates use the `adminAccessToken` inherited from the Admin folder.
 
 Valid status update values are:
 
-```
-processing
-completed
-```
+- `processing`
+- `completed`
 
-Cancellation uses the dedicated /cancel endpoint instead of
-the generic status endpoint.
+Cancellation uses the dedicated `/cancel` endpoint instead of the generic status endpoint.
+
+---
 
 ## Request chaining
 
-Post-response scripts can store data returned by one request
-as environment variables.
+Post-response scripts can store data returned by one request as environment variables.
 
 This allows later requests to reuse values such as:
 
-```
-customerAccessToken
-adminAccessToken
-orderId
-```
+- `customerAccessToken`
+- `adminAccessToken`
+- `orderId`
 
 without manually copying and pasting them.
+
+---
+
+## Postman tests
+
+Post-response scripts can also validate responses with `pm.test()` and `pm.expect()`.
+
+Examples include checking:
+
+- expected HTTP status
+- required response fields
+- user roles
+- initial order status
+
+Postman tests help during manual exploration but don't replace the Vitest and Supertest automated integration test suite.
+
+---
+
+## Script lifecycle
+
+### Pre-request scripts
+
+Pre-request scripts execute **before** a request is sent.
+
+They are used in this project to ensure that valid authentication tokens are available.
+
+### Post-response scripts
+
+Post-response scripts execute **after** a response is received.
+
+They are used to:
+
+- validate responses
+- store access tokens
+- store created order IDs
