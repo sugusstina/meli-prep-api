@@ -1,0 +1,489 @@
+{
+  "info": {
+    "_postman_id": "894e0239-55df-42cf-acff-5141cdb4b51f",
+    "name": "Meli prep API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58035881",
+    "_collection_link": "https://go.postman.co/collection/58035881-894e0239-55df-42cf-acff-5141cdb4b51f?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\n  \"Customer login returns 200\",\n  () => {\n    pm.response.to.have.status(200);\n  }\n);\n\nconst response =\n  pm.response.json();\n\npm.test(\n  \"Login returns an access token\",\n  () => {\n    pm.expect(\n      response.data.accessToken\n    ).to.be.a(\"string\");\n  }\n);\n\nif (\n  pm.response.code === 200 &&\n  response.data?.accessToken\n) {\n  pm.environment.set(\n    \"customerAccessToken\",\n    response.data.accessToken\n  );\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"password\": \"{{customerPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\n  \"Admin login returns 200\",\n  () => {\n    pm.response.to.have.status(200);\n  }\n);\n\nconst response =\n  pm.response.json();\n\npm.test(\n  \"Login returns an access token\",\n  () => {\n    pm.expect(\n      response.data.accessToken\n    ).to.be.a(\"string\");\n  }\n);\n\nif (\n  pm.response.code === 200 &&\n  response.data?.accessToken\n) {\n  pm.environment.set(\n    \"adminAccessToken\",\n    response.data.accessToken\n  );\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Public",
+      "item": []
+    },
+    {
+      "name": "Customer",
+      "item": [
+        {
+          "name": "Get me",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\n  \"Status is 200\",\n  () => {\n    pm.response.to.have.status(200);\n  }\n);\n\nconst response =\n  pm.response.json();\n\npm.test(\n  \"Response contains a user\",\n  () => {\n    pm.expect(\n      response.data.user\n    ).to.be.an(\"object\");\n  }\n);\n\npm.test(\n  \"Returns the authenticated customer\",\n  () => {\n    pm.expect(\n      response.data.user.email\n    ).to.equal(\n      pm.environment.get(\n        \"customerEmail\"\n      )\n    );\n  }\n);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\n  \"Order is created\",\n  () => {\n    pm.response.to.have.status(201);\n  }\n);\n\nconst response =\n  pm.response.json();\n\npm.test(\n  \"Order has an id\",\n  () => {\n    pm.expect(\n      response.data.id\n    ).to.be.a(\"string\");\n  }\n);\n\npm.test(\n  \"Order starts as pending\",\n  () => {\n    pm.expect(\n      response.data.status\n    ).to.equal(\"pending\");\n  }\n);\n\nif (\n  pm.response.code === 201 &&\n  response.data?.id\n) {\n  pm.environment.set(\n    \"orderId\",\n    response.data.id\n  );\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productIds\": [\n    \"product-1\",\n    \"product-2\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\n  \"Status is 200\",\n  () => {\n    pm.response.to.have.status(200);\n  }\n);\n\nconst response =\n  pm.response.json();\n\nconst expectedOrderId =\n  pm.environment.get(\"orderId\");\n\npm.test(\n  \"Returns the created order\",\n  () => {\n    pm.expect(\n      response.data.id\n    ).to.equal(expectedOrderId);\n  }\n);\n\npm.test(\n  \"Order is still pending\",\n  () => {\n    pm.expect(\n      response.data.status\n    ).to.equal(\"pending\");\n  }\n);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "My Orders",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\n  \"Status is 200\",\n  () => {\n    pm.response.to.have.status(200);\n  }\n);\n\nconst response =\n  pm.response.json();\n\nconst expectedOrderId =\n  pm.environment.get(\"orderId\");\n\npm.test(\n  \"Response contains an array\",\n  () => {\n    pm.expect(\n      response.data\n    ).to.be.an(\"array\");\n  }\n);\n\npm.test(\n  \"Created order appears in My Orders\",\n  () => {\n    const orderExists =\n      response.data.some(\n        (order) =>\n          order.id === expectedOrderId\n      );\n\n    pm.expect(orderExists)\n      .to.equal(true);\n  }\n);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/my-orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "my-orders"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\n  \"Status is 200\",\n  () => {\n    pm.response.to.have.status(200);\n  }\n);\n\nconst response =\n  pm.response.json();\n\nconst expectedOrderId =\n  pm.environment.get(\"orderId\");\n\npm.test(\n  \"Correct order was cancelled\",\n  () => {\n    pm.expect(\n      response.data.id\n    ).to.equal(expectedOrderId);\n  }\n);\n\npm.test(\n  \"Order status is cancelled\",\n  () => {\n    pm.expect(\n      response.data.status\n    ).to.equal(\"cancelled\");\n  }\n);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}",
+                "cancel"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Order Again",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\n  \"Status is 409\",\n  () => {\n    pm.response.to.have.status(409);\n  }\n);\n\nconst response =\n  pm.response.json();\n\npm.test(\n  \"Returns cancellation conflict\",\n  () => {\n    pm.expect(\n      response.error.code\n    ).to.equal(\n      \"ORDER_CANNOT_BE_CANCELLED\"\n    );\n  }\n);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}",
+                "cancel"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{customerAccessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function isTokenExpired(token) {\n  if (!token) {\n    return true;\n  }\n\n  try {\n    const parts = token.split(\".\");\n\n    if (parts.length !== 3) {\n      return true;\n    }\n\n    let payload = parts[1]\n      .replace(/-/g, \"+\")\n      .replace(/_/g, \"/\");\n\n    payload += \"=\".repeat(\n      (4 - (payload.length % 4)) % 4\n    );\n\n    const decoded = JSON.parse(\n      atob(payload)\n    );\n\n    const now =\n      Math.floor(Date.now() / 1000);\n\n    return (\n      !decoded.exp ||\n      decoded.exp <= now + 30\n    );\n  } catch {\n    return true;\n  }\n}\n\nasync function ensureCustomerToken() {\n  const currentToken =\n    pm.environment.get(\n      \"customerAccessToken\"\n    );\n\n  if (!isTokenExpired(currentToken)) {\n    return;\n  }\n\n  const response =\n    await pm.sendRequest({\n      url:\n        `${pm.environment.get(\n          \"baseUrl\"\n        )}/api/auth/login`,\n\n      method: \"POST\",\n\n      header: {\n        \"Content-Type\":\n          \"application/json\"\n      },\n\n      body: {\n        mode: \"raw\",\n\n        raw: JSON.stringify({\n          email:\n            pm.environment.get(\n              \"customerEmail\"\n            ),\n\n          password:\n            pm.environment.get(\n              \"customerPassword\"\n            )\n        })\n      }\n    });\n\n  if (response.code !== 200) {\n    throw new Error(\n      `Customer login failed: ${response.code}`\n    );\n  }\n\n  const body = response.json();\n\n  pm.environment.set(\n    \"customerAccessToken\",\n    body.data.accessToken\n  );\n}\n\nawait ensureCustomerToken();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get All Orders",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\n  \"Status is 200\",\n  () => {\n    pm.response.to.have.status(200);\n  }\n);\n\nconst response =\n  pm.response.json();\n\nconst expectedOrderId =\n  pm.environment.get(\"orderId\");\n\npm.test(\n  \"Response contains an array\",\n  () => {\n    pm.expect(\n      response.data\n    ).to.be.an(\"array\");\n  }\n);\n\npm.test(\n  \"Created order is visible to admin\",\n  () => {\n    const orderExists =\n      response.data.some(\n        (order) =>\n          order.id === expectedOrderId\n      );\n\n    pm.expect(orderExists)\n      .to.equal(true);\n  }\n);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Set Order Processing",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\n  \"Status is 200\",\n  () => {\n    pm.response.to.have.status(200);\n  }\n);\n\nconst response =\n  pm.response.json();\n\nconst expectedOrderId =\n  pm.environment.get(\"orderId\");\n\npm.test(\n  \"Updates the correct order\",\n  () => {\n    pm.expect(\n      response.data.id\n    ).to.equal(expectedOrderId);\n  }\n);\n\npm.test(\n  \"Order status is processing\",\n  () => {\n    pm.expect(\n      response.data.status\n    ).to.equal(\"processing\");\n  }\n);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"processing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}",
+                "status"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Complete Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\n  \"Status is 200\",\n  () => {\n    pm.response.to.have.status(200);\n  }\n);\n\nconst response =\n  pm.response.json();\n\nconst expectedOrderId =\n  pm.environment.get(\"orderId\");\n\npm.test(\n  \"Updates the correct order\",\n  () => {\n    pm.expect(\n      response.data.id\n    ).to.equal(expectedOrderId);\n  }\n);\n\npm.test(\n  \"Order status is completed\",\n  () => {\n    pm.expect(\n      response.data.status\n    ).to.equal(\"completed\");\n  }\n);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"completed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}",
+                "status"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Try Reopen Completed Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\n  \"Status is 409\",\n  () => {\n    pm.response.to.have.status(409);\n  }\n);\n\nconst response =\n  pm.response.json();\n\npm.test(\n  \"Returns invalid transition error\",\n  () => {\n    pm.expect(\n      response.error.code\n    ).to.equal(\n      \"INVALID_ORDER_STATUS_TRANSITION\"\n    );\n  }\n);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"processing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}",
+                "status"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{adminAccessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function isTokenExpired(token) {\n  if (!token) {\n    return true;\n  }\n\n  try {\n    const parts = token.split(\".\");\n\n    if (parts.length !== 3) {\n      return true;\n    }\n\n    let payload = parts[1]\n      .replace(/-/g, \"+\")\n      .replace(/_/g, \"/\");\n\n    payload += \"=\".repeat(\n      (4 - (payload.length % 4)) % 4\n    );\n\n    const decoded = JSON.parse(\n      atob(payload)\n    );\n\n    const now =\n      Math.floor(Date.now() / 1000);\n\n    return (\n      !decoded.exp ||\n      decoded.exp <= now + 30\n    );\n  } catch {\n    return true;\n  }\n}\n\nasync function ensureAdminToken() {\n  const currentToken =\n    pm.environment.get(\n      \"adminAccessToken\"\n    );\n\n  if (!isTokenExpired(currentToken)) {\n    return;\n  }\n\n  const response =\n    await pm.sendRequest({\n      url:\n        `${pm.environment.get(\n          \"baseUrl\"\n        )}/api/auth/login`,\n\n      method: \"POST\",\n\n      header: {\n        \"Content-Type\":\n          \"application/json\"\n      },\n\n      body: {\n        mode: \"raw\",\n\n        raw: JSON.stringify({\n          email:\n            pm.environment.get(\n              \"adminEmail\"\n            ),\n\n          password:\n            pm.environment.get(\n              \"adminPassword\"\n            )\n        })\n      }\n    });\n\n  if (response.code !== 200) {\n    throw new Error(\n      `Admin login failed: ${response.code}`\n    );\n  }\n\n  const body = response.json();\n\n  pm.environment.set(\n    \"adminAccessToken\",\n    body.data.accessToken\n  );\n}\n\nawait ensureAdminToken();"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
